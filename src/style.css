@@ -1319,6 +1319,54 @@ button { background: none; border: none; cursor: pointer; color: inherit; font: 
   color: var(--text-dim);
 }
 
+/* ----- Highlights Section (Homepage) ----- */
+.highlights-section {
+  background: var(--bg);
+}
+
+.highlights-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.highlight-card {
+  padding: 28px 24px;
+  border-radius: var(--radius);
+  border: 1px solid rgba(255,255,255,0.04);
+  background: rgba(255,255,255,0.02);
+  opacity: 0;
+  transform: translateY(40px);
+  transition: transform var(--transition), border-color var(--transition);
+}
+
+.highlight-card:hover {
+  border-color: rgba(255,255,255,0.1);
+  transform: translateY(-4px);
+}
+
+.highlight-icon {
+  font-size: 28px;
+  color: var(--accent-1);
+  display: block;
+  margin-bottom: 12px;
+}
+
+.highlight-title {
+  font-family: 'Space Grotesk', 'Noto Sans SC', sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.highlight-desc {
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--text-muted);
+  font-weight: 300;
+}
+
 /* ----- Works Section (Homepage) ----- */
 .works-section {
   background: var(--bg);
@@ -1583,6 +1631,10 @@ button { background: none; border: none; cursor: pointer; color: inherit; font: 
 /* ----- Responsive ----- */
 @media (max-width: 1024px) {
   .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .highlights-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 

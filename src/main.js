@@ -243,6 +243,35 @@ function setupReveals() {
 }
 
 /* ============================================
+   Highlights
+   ============================================ */
+function renderHighlights() {
+  const grid = document.getElementById('highlights-grid')
+  if (!grid) return
+
+  grid.innerHTML = siteData.highlights
+    .map((h, i) => `
+      <div class="highlight-card reveal-up" data-delay="${i * 0.1}">
+        <span class="highlight-icon">${h.icon}</span>
+        <h3 class="highlight-title">${h.label}</h3>
+        <p class="highlight-desc">${h.desc}</p>
+      </div>
+    `)
+    .join('')
+
+  grid.querySelectorAll('.highlight-card').forEach((card) => {
+    ScrollTrigger.create({
+      trigger: card,
+      start: 'top 85%',
+      once: true,
+      onEnter: () => {
+        gsap.to(card, { opacity: 1, y: 0, duration: 0.7, delay: parseFloat(card.dataset.delay) || 0, ease: 'power3.out', overwrite: 'auto' })
+      },
+    })
+  })
+}
+
+/* ============================================
    Footer Top
    ============================================ */
 function setupFooterTop() {
@@ -282,6 +311,7 @@ function init() {
 
   animateHero()
   renderStats()
+  renderHighlights()
   renderFeatured()
   renderAboutBrief()
   renderContact('')
