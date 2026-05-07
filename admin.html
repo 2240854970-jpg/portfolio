@@ -6,167 +6,50 @@
   <title>管理后台 — 作品集</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet" />
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    :root {
-      --bg: #0a0a0a; --bg-card: #111; --bg-input: #1a1a1a;
-      --text: #f0f0f0; --text-muted: #888; --text-dim: #555;
-      --accent: #c084fc; --border: rgba(255,255,255,0.08);
-      --radius: 8px; --transition: 0.3s ease;
-    }
-    body { font-family: 'Inter', 'Noto Sans SC', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
-    input, textarea, select { font: inherit; color: var(--text); background: var(--bg-input); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 14px; width: 100%; outline: none; transition: border-color var(--transition); }
-    input:focus, textarea:focus, select:focus { border-color: var(--accent); }
-    textarea { resize: vertical; min-height: 80px; }
-    label { display: block; font-size: 13px; color: var(--text-muted); margin-bottom: 6px; font-weight: 500; }
-    .btn { padding: 10px 24px; border-radius: var(--radius); border: none; cursor: pointer; font-size: 14px; font-weight: 500; transition: all var(--transition); }
-    .btn-primary { background: var(--accent); color: #000; }
-    .btn-primary:hover { opacity: 0.85; }
-    .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
-    .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
-    .btn-danger { background: #ef4444; color: #fff; }
-    .btn-danger:hover { opacity: 0.85; }
-    .container { max-width: 800px; margin: 0 auto; padding: 0 20px; }
-
-    /* Login */
-    #login-screen {
-      display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px;
-    }
-    .login-box {
-      width: 100%; max-width: 400px; padding: 40px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg-card);
-    }
-    .login-box h1 { font-size: 24px; margin-bottom: 8px; }
-    .login-box p { font-size: 14px; color: var(--text-muted); margin-bottom: 28px; }
-    .login-box .form-group { margin-bottom: 16px; }
-    .login-box .btn { width: 100%; margin-top: 8px; }
-    .login-error { color: #ef4444; font-size: 13px; margin-top: 8px; display: none; }
-
-    /* Dashboard */
-    #dashboard { display: none; padding: 40px 0; }
-    .admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
-    .admin-header h1 { font-size: 22px; font-weight: 600; }
-    .admin-header .btn { font-size: 13px; }
-    .section-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 20px; }
-    .section-card h2 { font-size: 16px; font-weight: 600; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
-    .form-group { margin-bottom: 16px; }
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-    .stat-group { display: grid; grid-template-columns: 1fr 2fr; gap: 8px; align-items: center; margin-bottom: 8px; padding: 8px; background: rgba(255,255,255,0.02); border-radius: 6px; }
-    .stat-group input { }
-    .toast {
-      position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
-      padding: 14px 28px; border-radius: var(--radius); font-size: 14px;
-      background: #222; border: 1px solid var(--border); color: var(--text);
-      opacity: 0; transition: opacity 0.4s ease; pointer-events: none; z-index: 999;
-    }
-    .toast.show { opacity: 1; }
-    .toast.success { border-color: #22c55e; }
-    .toast.error { border-color: #ef4444; }
-
-    /* Token input */
-    .token-notice { font-size: 12px; color: var(--text-dim); margin-top: 4px; }
-
-    /* Work editor */
-    .work-item { background: rgba(255,255,255,0.02); border-radius: 8px; padding: 16px; margin-bottom: 12px; }
-    .work-item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-    .work-item-title { font-size: 14px; font-weight: 500; }
-    .work-item .btn { font-size: 12px; padding: 4px 12px; }
-    .work-detail { display: none; }
-    .work-detail.open { display: block; }
-    .showcase-item { background: rgba(255,255,255,0.02); border-radius: 6px; padding: 12px; margin-bottom: 8px; }
-    .showcase-item h4 { font-size: 13px; color: var(--text-muted); margin-bottom: 8px; }
-
-    @media (max-width: 600px) {
-      .form-row { grid-template-columns: 1fr; }
-      .stat-group { grid-template-columns: 1fr; }
-    }
-  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Noto+Sans+SC:wght@300;400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/src/style.css" />
+  <link rel="stylesheet" href="/src/admin.css" />
 </head>
 <body>
 
-  <!-- ====== Login ====== -->
-  <div id="login-screen">
-    <div class="login-box">
-      <h1>✦ 管理后台</h1>
-      <p>登录后可在网站直接编辑内容</p>
+  <!-- ====== Admin Entry Button ====== -->
+  <button class="admin-enter-btn" id="admin-entry" title="管理后台">✦</button>
+
+  <!-- ====== Login Modal ====== -->
+  <div class="admin-modal-overlay" id="login-modal">
+    <div class="admin-modal">
+      <h2>✦ 管理后台</h2>
+      <p>登录后可直接在页面编辑内容</p>
       <div class="form-group">
         <label>管理密码</label>
-        <input type="password" id="admin-password" placeholder="请输入密码" />
+        <input type="password" id="admin-pwd" placeholder="请输入密码" />
       </div>
       <div class="form-group">
         <label>GitHub Token</label>
-        <input type="password" id="github-token" placeholder="ghp_..." />
-        <div class="token-notice">需要 Contents 写入权限的 GitHub token</div>
+        <input type="password" id="admin-token" placeholder="ghp_..." />
       </div>
-      <button class="btn btn-primary" onclick="handleLogin()">登录</button>
-      <div class="login-error" id="login-error">密码错误，请重试</div>
+      <button class="btn" onclick="adminLogin()">登录</button>
+      <div class="admin-error" id="admin-error">密码错误，请重试</div>
     </div>
   </div>
 
-  <!-- ====== Dashboard ====== -->
-  <div id="dashboard">
-    <div class="container">
+  <!-- ====== Site Preview (rendered by JS) ====== -->
+  <div id="site-preview"></div>
 
-      <div class="admin-header">
-        <h1>✦ 管理后台</h1>
-        <div>
-          <button class="btn btn-outline" onclick="previewChanges()" style="margin-right:8px">预览</button>
-          <button class="btn btn-primary" onclick="saveAll()">💾 保存所有修改</button>
-        </div>
+  <!-- ====== Inline Editor Modal ====== -->
+  <div class="inline-editor-overlay" id="editor-modal">
+    <div class="inline-editor">
+      <h3 id="editor-title">编辑</h3>
+      <div id="editor-fields"></div>
+      <div class="inline-editor-actions">
+        <button class="btn btn-editor-cancel" onclick="closeEditor()">取消</button>
+        <button class="btn btn-editor-save" onclick="saveEditor()">保存</button>
       </div>
-
-      <!-- Personal Info -->
-      <div class="section-card" id="section-info">
-        <h2>个人信息</h2>
-        <div class="form-row">
-          <div class="form-group">
-            <label>姓名</label>
-            <input type="text" id="edit-name" />
-          </div>
-          <div class="form-group">
-            <label>英文名</label>
-            <input type="text" id="edit-nameEn" />
-          </div>
-        </div>
-        <div class="form-group">
-          <label>职位标题</label>
-          <input type="text" id="edit-title" />
-        </div>
-        <div class="form-group">
-          <label>标语</label>
-          <input type="text" id="edit-tagline" />
-        </div>
-        <div class="form-group">
-          <label>邮箱</label>
-          <input type="email" id="edit-email" />
-        </div>
-      </div>
-
-      <!-- Stats -->
-      <div class="section-card">
-        <h2>首页成就数据</h2>
-        <div id="stats-editor"></div>
-      </div>
-
-      <!-- Works -->
-      <div class="section-card">
-        <h2>作品管理</h2>
-        <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px">展开作品，修改描述文字。改完点保存全部生效。</p>
-        <div id="works-editor"></div>
-      </div>
-
-      <!-- About Bio -->
-      <div class="section-card">
-        <h2>关于我 — 个人介绍</h2>
-        <div class="form-group"><label>第一段</label><textarea id="edit-bio1" rows="3"></textarea></div>
-        <div class="form-group"><label>第二段</label><textarea id="edit-bio2" rows="3"></textarea></div>
-        <div class="form-group"><label>第三段</label><textarea id="edit-bio3" rows="3"></textarea></div>
-      </div>
-
     </div>
   </div>
 
-  <div class="toast" id="toast"></div>
+  <!-- ====== Toast ====== -->
+  <div class="admin-toast" id="admin-toast"></div>
 
   <script>
     const OWNER = '2240854970-jpg'
@@ -175,319 +58,308 @@
     const BRANCH = 'main'
 
     let siteData = null
-    let fileSha = null
-    let githubToken = ''
-
-    // ── Login ──
-    async function handleLogin() {
-      const pwd = document.getElementById('admin-password').value
-      const token = document.getElementById('github-token').value
-      githubToken = token
-
-      // Read the file to verify password
-      const resp = await githubGet(FILE_PATH)
-      if (!resp) { showToast('无法连接到 GitHub，请检查 Token', 'error'); return }
-
-      const content = decodeBase64(resp.content)
-      fileSha = resp.sha
-
-      // Find password - look for email line and extract adminPassword
-      const pwdMatch = content.match(/adminPassword['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
-
-      if (!pwdMatch || pwdMatch[1] !== pwd) {
-        document.getElementById('login-error').style.display = 'block'
-        return
-      }
-
-      document.getElementById('login-error').style.display = 'none'
-      document.getElementById('login-screen').style.display = 'none'
-      document.getElementById('dashboard').style.display = 'block'
-
-      parseData(content)
-      renderForms()
-    }
+    let fileContent = ''
+    let fileSha = ''
+    let gitToken = ''
+    let editQueue = []
+    let currentEditField = null
 
     // ── GitHub API ──
-    async function githubGet(path) {
-      try {
-        const r = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`, {
-          headers: { 'Authorization': `Bearer ${githubToken}`, 'Accept': 'application/vnd.github+json' }
-        })
-        return r.ok ? await r.json() : null
-      } catch { return null }
+    async function gh(path) {
+      const r = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`, {
+        headers: { 'Authorization': `Bearer ${gitToken}`, 'Accept': 'application/vnd.github+json' }
+      })
+      return r.ok ? await r.json() : null
     }
 
-    async function githubPut(path, content, message) {
+    async function ghPut(path, content, msg) {
       const b64 = btoa(unescape(encodeURIComponent(content)))
-      const body = { message, content: b64, sha: fileSha, branch: BRANCH }
       const r = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`, {
         method: 'PUT',
-        headers: { 'Authorization': `Bearer ${githubToken}`, 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
+        headers: { 'Authorization': `Bearer ${gitToken}`, 'Accept': 'application/vnd.github+json`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: msg, content: b64, sha: fileSha, branch: BRANCH })
       })
-      const json = await r.json()
-      if (r.ok) fileSha = json.content.sha
+      if (r.ok) { const j = await r.json(); fileSha = j.content.sha }
       return r.ok
     }
 
-    function decodeBase64(str) {
-      try { return decodeURIComponent(escape(atob(str))) } catch { return atob(str) }
+    function decode(b64) {
+      try { return decodeURIComponent(escape(atob(b64))) } catch { return atob(b64) }
     }
 
-    // ── Parse site-data.js ──
-    function parseData(content) {
-      // Extract values using regex
-      siteData = { raw: content }
-
-      const g = (re) => { const m = content.match(re); return m ? m[1] : '' }
-
-      siteData.name = g(/name['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
-      siteData.nameEn = g(/nameEn['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
-      siteData.title = g(/title['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
-      siteData.tagline = g(/tagline['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
-      siteData.email = g(/email['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
-      siteData.adminPassword = g(/adminPassword['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
-
-      // Stats
-      const statsRegex = /stats:\s*\[(.*?)\]/s
-      const statsMatch = content.match(statsRegex)
-      if (statsMatch) {
-        siteData.statsRaw = statsMatch[1]
-        const items = statsMatch[1].match(/\{[^}]+\}/g) || []
-        siteData.stats = items.map(item => ({
-          value: (item.match(/value['"]?\s*[:=]\s*['"]([^'"]+)['"]/) || [,''])[1],
-          label: (item.match(/label['"]?\s*[:=]\s*['"]([^'"]+)['"]/) || [,''])[1],
-          icon: (item.match(/icon['"]?\s*[:=]\s*['"]([^'"]+)['"]/) || [,''])[1],
-        }))
-      }
-
-      // Works
-      const worksRegex = /works:\s*\[(.*?)\],\s*\n\s*\/\*\s*── 首页精选/s
-      const worksMatch = content.match(worksRegex)
-      if (worksMatch) {
-        siteData.worksRaw = worksMatch[1]
-        // Extract each work object
-        const workBlocks = extractObjects(worksMatch[1])
-        siteData.works = workBlocks.map(block => ({
-          raw: block,
-          id: (block.match(/id['"]?\s*[:=]\s*['"]([^'"]+)['"]/) || [,''])[1],
-          title: (block.match(/title['"]?\s*[:=]\s*['"]([^'"]+)['"]/) || [,''])[1],
-          brief: (block.match(/brief['"]?\s*[:=]\s*['"]([^'"]+)['"]/) || [,''])[1],
-          designIntro: (block.match(/designIntro['"]?\s*[:=]\s*['"]([^'"]+)['"]/) || [,''])[1],
-          designResult: (block.match(/designResult['"]?\s*[:=]\s*['"]([^'"]+)['"]/) || [,''])[1],
-          showCase: extractShowCases(block),
-        }))
-      }
-
-      // Featured work IDs
-      const fw = content.match(/featuredWorkIds['"]?\s*[:=]\s*\[([^\]]+)\]/)
-      siteData.featuredWorkIds = fw ? fw[1].split(',').map(s => s.trim().replace(/['"]/g,'')) : []
-
-      // About bios
-      siteData.bio1 = g(/bio1['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
-      siteData.bio2 = g(/bio2['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
-      siteData.bio3 = g(/bio3['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
+    // ── Login ──
+    async function adminLogin() {
+      const pwd = document.getElementById('admin-pwd').value
+      gitToken = document.getElementById('admin-token').value
+      const resp = await gh(FILE_PATH)
+      if (!resp) { showToast('无法连接 GitHub', 'error'); return }
+      fileContent = decode(resp.content)
+      fileSha = resp.sha
+      const pm = fileContent.match(/adminPassword['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
+      if (!pm || pm[1] !== pwd) { document.getElementById('admin-error').style.display = 'block'; return }
+      document.getElementById('admin-error').style.display = 'none'
+      document.getElementById('login-modal').classList.remove('open')
+      document.body.classList.add('edit-mode')
+      document.querySelector('.admin-toolbar')?.classList.add('open')
+      renderSite()
     }
 
-    function extractObjects(str) {
-      const result = []
-      let depth = 0, start = -1
-      for (let i = 0; i < str.length; i++) {
-        if (str[i] === '{') { if (depth === 0) start = i; depth++ }
-        else if (str[i] === '}') { depth--; if (depth === 0 && start >= 0) { result.push(str.slice(start, i + 1)); start = -1 } }
-      }
-      return result
-    }
+    // ── Render Site Preview ──
+    function renderSite() {
+      // Parse data
+      const g = (re) => { const m = fileContent.match(re); return m ? m[1].trim() : '' }
+      const name = g(/name['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
+      const title = g(/title['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
+      const tagline = g(/tagline['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
+      const email = g(/email['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
+      const footer = g(/footer['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
 
-    function extractShowCases(block) {
-      const scMatch = block.match(/showCase['"]?\s*[:=]\s*\[(.*?)\]\s*\},?\s*$/s)
-      if (!scMatch) return []
-      const items = extractObjects(scMatch[1])
-      return items.map(item => ({
-        raw: item,
-        src: (item.match(/src['"]?\s*[:=]\s*['"]([^'"]+)['"]/) || [,''])[1],
-        title: (item.match(/title['"]?\s*[:=]\s*['"]([^'"]+)['"]/) || [,''])[1],
-        desc: (item.match(/desc['"]?\s*[:=]\s*['"]([^'"]+)['"]/) || [,''])[1],
-      }))
-    }
+      const statsBlock = fileContent.match(/stats:\s*\[(.*?)\]/s)
+      const stats = statsBlock ? [...statsBlock[1].matchAll(/\{([^}]+)\}/g)].map(m => {
+        const v = m[1].match(/value['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
+        const l = m[1].match(/label['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
+        const i = m[1].match(/icon['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
+        return { value: v ? v[1] : '', label: l ? l[1] : '', icon: i ? i[1] : '' }
+      }) : []
 
-    // ── Render Forms ──
-    function renderForms() {
-      if (!siteData) return
+      const highlightsBlock = fileContent.match(/highlights:\s*\[(.*?)\]\s*\],/s)
+      const highlights = highlightsBlock ? [...highlightsBlock[1].matchAll(/\{([^}]+)\}/g)].map(m => {
+        const ic = m[1].match(/icon['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
+        const la = m[1].match(/label['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
+        const d = m[1].match(/desc['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
+        return { icon: ic ? ic[1] : '', label: la ? la[1] : '', desc: d ? d[1] : '' }
+      }) : []
 
-      // Info
-      document.getElementById('edit-name').value = siteData.name || ''
-      document.getElementById('edit-nameEn').value = siteData.nameEn || ''
-      document.getElementById('edit-title').value = siteData.title || ''
-      document.getElementById('edit-tagline').value = siteData.tagline || ''
-      document.getElementById('edit-email').value = siteData.email || ''
+      const bio1 = g(/bio1['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
+      const bio2 = g(/bio2['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
+      const bio3 = g(/bio3['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
 
-      // Stats
-      const statsEl = document.getElementById('stats-editor')
-      statsEl.innerHTML = ''
-      if (siteData.stats) {
-        siteData.stats.forEach((stat, i) => {
-          const div = document.createElement('div')
-          div.className = 'stat-group'
-          div.innerHTML = `
-            <input type="text" class="stat-value" value="${stat.value}" data-idx="${i}" />
-            <input type="text" class="stat-label" value="${stat.label}" data-idx="${i}" />
-          `
-          statsEl.appendChild(div)
-        })
-      }
+      const socialsMatch = fileContent.match(/socials:\s*\[(.*?)\]\s*\],/s)
+      const socials = socialsMatch ? [...socialsMatch[1].matchAll(/\{([^}]+)\}/g)].map(m => {
+        const n = m[1].match(/name['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
+        const u = m[1].match(/url['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
+        return { name: n ? n[1] : '', url: u ? u[1] : '' }
+      }) : []
 
-      // Works
-      const worksEl = document.getElementById('works-editor')
-      worksEl.innerHTML = ''
-      if (siteData.works) {
-        siteData.works.forEach((work, i) => {
-          const div = document.createElement('div')
-          div.className = 'work-item'
-          div.innerHTML = `
-            <div class="work-item-header">
-              <span class="work-item-title">${work.title || '未命名作品'}</span>
-              <button class="btn btn-outline" onclick="toggleWork(${i})">展开编辑</button>
+      // ── Build HTML ──
+      const html = `
+        <!-- Hero -->
+        <section class="hero" style="height:80vh;min-height:500px">
+          <div class="hero-overlay"></div>
+          <div class="hero-content">
+            <div class="hero-text">
+              <p class="hero-label" style="opacity:1">Portfolio · 跨境电商平面设计</p>
+              <h1 class="hero-title" style="font-size:clamp(36px,6vw,72px)">
+                <span class="hero-line" style="overflow:visible">
+                  <span data-field="name" class="edit-overlay" style="display:inline-block">${name}</span>
+                </span>
+                <span class="hero-line" style="font-size:0.5em;font-weight:400;overflow:visible">
+                  <span data-field="title" class="edit-overlay" style="display:inline-block">${title}</span>
+                </span>
+              </h1>
+              <p class="hero-sub" style="opacity:1;transform:none">
+                <span data-field="tagline" class="edit-overlay" style="display:inline-block">${tagline}</span>
+              </p>
             </div>
-            <div class="work-detail" id="work-detail-${i}">
-              <div class="form-group">
-                <label>Brief（简介）</label>
-                <textarea class="work-brief" data-idx="${i}" rows="2">${work.brief || ''}</textarea>
-              </div>
-              <div class="form-group">
-                <label>Design Intro（设计思路）</label>
-                <textarea class="work-intro" data-idx="${i}" rows="3">${work.designIntro || ''}</textarea>
-              </div>
-              ${(work.showCase || []).map((sc, si) => `
-                <div class="showcase-item">
-                  <h4>图 ${si + 1}: ${sc.title || ''}</h4>
-                  <div class="form-group">
-                    <label>描述</label>
-                    <textarea class="showcase-desc" data-work="${i}" data-showcase="${si}" rows="2">${sc.desc || ''}</textarea>
-                  </div>
+          </div>
+        </section>
+
+        <!-- Stats -->
+        <section class="section stats-section">
+          <div class="container">
+            <div class="stats-grid">
+              ${stats.map((s, i) => `
+                <div class="stat-item edit-overlay" style="opacity:1;transform:none" data-stat="${i}">
+                  <span class="stat-icon">${s.icon}</span>
+                  <span class="stat-value" data-field="stat-${i}-value">${s.value}</span>
+                  <span class="stat-label" data-field="stat-${i}-label">${s.label}</span>
                 </div>
               `).join('')}
-              <div class="form-group">
-                <label>Design Result（成果数据）</label>
-                <textarea class="work-result" data-idx="${i}" rows="2">${work.designResult || ''}</textarea>
+            </div>
+          </div>
+        </section>
+
+        <!-- Highlights -->
+        <section class="section highlights-section">
+          <div class="container">
+            <div class="section-header">
+              <h2 class="section-title"><span class="section-number">✦</span><span class="section-heading">核心价值</span></h2>
+            </div>
+            <div class="highlights-grid">
+              ${highlights.map((h, i) => `
+                <div class="highlight-card edit-overlay" style="opacity:1;transform:none" data-highlight="${i}">
+                  <span class="highlight-icon">${h.icon}</span>
+                  <h3 class="highlight-title" data-field="hl-${i}-label">${h.label}</h3>
+                  <p class="highlight-desc" data-field="hl-${i}-desc">${h.desc}</p>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </section>
+
+        <!-- About Brief -->
+        <section class="section about-brief-section">
+          <div class="container">
+            <div class="about-brief" style="opacity:1;transform:none">
+              <div class="about-brief-text">
+                <h2 class="section-title"><span class="section-number">✦</span><span class="section-heading">关于我</span></h2>
+                <p class="about-brief-p edit-overlay" data-field="bio1">${bio1}</p>
+                <p class="about-brief-p edit-overlay" data-field="bio2">${bio2}</p>
+                <p class="about-brief-p edit-overlay" data-field="bio3">${bio3}</p>
+              </div>
+              <div class="about-brief-visual">
+                <div class="about-avatar-frame">
+                  <div class="about-avatar-placeholder"><span class="avatar-icon">✦</span></div>
+                </div>
               </div>
             </div>
-          `
-          worksEl.appendChild(div)
+          </div>
+        </section>
+
+        <!-- Contact -->
+        <section class="section contact-section">
+          <div class="container">
+            <div class="contact-inner" style="opacity:1;transform:none">
+              <h2 class="section-title" style="justify-content:center">
+                <span class="section-number">✦</span>
+                <span class="section-heading">联系我</span>
+              </h2>
+              <p class="contact-text edit-overlay" data-field="email" style="opacity:1">有兴趣聊一聊？给我发邮件吧</p>
+              <a class="contact-email" style="opacity:1">
+                <span class="email-text" data-field="email">${email}</span>
+                <span class="email-arrow">→</span>
+              </a>
+              <div class="contact-socials">
+                ${socials.map(s => `<a class="social-link">${s.name}</a>`).join('')}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+          <div class="container">
+            <div class="footer-inner">
+              <span class="footer-copy" data-field="footer">${footer}</span>
+              <a class="footer-top">↑ 回到顶部</a>
+            </div>
+          </div>
+        </footer>
+
+        <!-- Admin Toolbar -->
+        <div class="admin-toolbar open">
+          <span class="admin-toolbar-status">已登录 · <span class="has-changes" id="change-count">0 项修改</span></span>
+          <div class="admin-toolbar-actions">
+            <button class="btn btn-admin-cancel" onclick="resetChanges()">重置</button>
+            <button class="btn btn-admin-save" onclick="saveAll()">💾 保存部署</button>
+          </div>
+        </div>
+      `
+
+      document.getElementById('site-preview').innerHTML = html
+      bindEditButtons()
+    }
+
+    // ── Edit System ──
+    function bindEditButtons() {
+      document.querySelectorAll('[data-field]').forEach(el => {
+        el.style.cursor = 'pointer'
+        el.title = '点击编辑'
+        el.addEventListener('click', (e) => {
+          e.stopPropagation()
+          openFieldEditor(el.dataset.field, el.textContent.trim())
         })
+      })
+    }
+
+    function openFieldEditor(field, currentValue) {
+      currentEditField = field
+      document.getElementById('editor-title').textContent = `编辑 — ${field}`
+      document.getElementById('editor-fields').innerHTML = `
+        <label>内容</label>
+        <textarea id="editor-value" rows="4">${currentValue}</textarea>
+      `
+      document.getElementById('editor-modal').classList.add('open')
+    }
+
+    function closeEditor() {
+      document.getElementById('editor-modal').classList.remove('open')
+      currentEditField = null
+    }
+
+    function saveEditor() {
+      const val = document.getElementById('editor-value').value
+      const field = currentEditField
+      if (!field) return
+
+      // Update display
+      document.querySelectorAll(`[data-field="${field}"]`).forEach(el => {
+        el.textContent = val
+        el.classList.add('edit-changed')
+      })
+
+      // Track change
+      const existing = editQueue.find(e => e.field === field)
+      if (existing) existing.value = val
+      else editQueue.push({ field, value: val })
+
+      document.getElementById('change-count').textContent = `${editQueue.length} 项修改`
+      closeEditor()
+    }
+
+    function resetChanges() {
+      editQueue = []
+      document.querySelectorAll('.edit-changed').forEach(el => el.classList.remove('edit-changed'))
+      document.getElementById('change-count').textContent = '0 项修改'
+      showToast('已重置')
+    }
+
+    // ── Save to GitHub ──
+    async function saveAll() {
+      if (editQueue.length === 0) { showToast('没有修改需要保存', 'error'); return }
+      showToast('正在保存到 GitHub...')
+
+      let newContent = fileContent
+      for (const { field, value } of editQueue) {
+        const escaped = value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+        const re = new RegExp(`(${field}['"]?\\s*[:=]\\s*['"])[^'"]+(['"])`)
+        newContent = newContent.replace(re, `$1${escaped}$2`)
       }
 
-      // About
-      document.getElementById('edit-bio1').value = siteData.bio1 || ''
-      document.getElementById('edit-bio2').value = siteData.bio2 || ''
-      document.getElementById('edit-bio3').value = siteData.bio3 || ''
-    }
-
-    function toggleWork(i) {
-      const el = document.getElementById(`work-detail-${i}`)
-      el.classList.toggle('open')
-    }
-
-    // ── Preview ──
-    function previewChanges() {
-      window.open('https://2240854970-jpg.github.io/portfolio/', '_blank')
-    }
-
-    // ── Save ──
-    async function saveAll() {
-      showToast('正在保存...')
-
-      // Build updated content
-      let content = siteData.raw
-
-      // Update personal info
-      content = replaceValue(content, /(name['"]?\s*[:=]\s*['"])[^'"]+(['"])/, document.getElementById('edit-name').value)
-      content = replaceValue(content, /(nameEn['"]?\s*[:=]\s*['"])[^'"]+(['"])/, document.getElementById('edit-nameEn').value)
-      content = replaceValue(content, /(title['"]?\s*[:=]\s*['"])[^'"]+(['"])/, document.getElementById('edit-title').value)
-      content = replaceValue(content, /(tagline['"]?\s*[:=]\s*['"])[^'"]+(['"])/, document.getElementById('edit-tagline').value)
-      content = replaceValue(content, /(email['"]?\s*[:=]\s*['"])[^'"]+(['"])/, document.getElementById('edit-email').value)
-
-      // Update stats
-      const statInputs = document.querySelectorAll('.stat-value')
-      statInputs.forEach(input => {
-        const i = parseInt(input.dataset.idx)
-        content = replaceStatValue(content, i, 'value', input.value)
-      })
-      const statLabels = document.querySelectorAll('.stat-label')
-      statLabels.forEach(input => {
-        const i = parseInt(input.dataset.idx)
-        content = replaceStatValue(content, i, 'label', input.value)
-      })
-
-      // Update work fields
-      document.querySelectorAll('.work-brief').forEach(el => {
-        const i = parseInt(el.dataset.idx)
-        if (siteData.works[i]) content = replaceWorkField(content, siteData.works[i].raw, 'brief', el.value)
-      })
-      document.querySelectorAll('.work-intro').forEach(el => {
-        const i = parseInt(el.dataset.idx)
-        if (siteData.works[i]) content = replaceWorkField(content, siteData.works[i].raw, 'designIntro', el.value)
-      })
-      document.querySelectorAll('.work-result').forEach(el => {
-        const i = parseInt(el.dataset.idx)
-        if (siteData.works[i]) content = replaceWorkField(content, siteData.works[i].raw, 'designResult', el.value)
-      })
-      document.querySelectorAll('.showcase-desc').forEach(el => {
-        const wi = parseInt(el.dataset.work)
-        const si = parseInt(el.dataset.showcase)
-        if (siteData.works[wi] && siteData.works[wi].showCase[si]) {
-          content = replaceWorkField(content, siteData.works[wi].showCase[si].raw, 'desc', el.value)
-        }
-      })
-
-      // Update about bios
-      content = replaceValue(content, /(bio1['"]?\s*[:=]\s*['"])[^'"]+(['"])/, document.getElementById('edit-bio1').value)
-      content = replaceValue(content, /(bio2['"]?\s*[:=]\s*['"])[^'"]+(['"])/, document.getElementById('edit-bio2').value)
-      content = replaceValue(content, /(bio3['"]?\s*[:=]\s*['"])[^'"]+(['"])/, document.getElementById('edit-bio3').value)
-
-      // Save to GitHub
-      const ok = await githubPut(FILE_PATH, content, 'feat: 管理后台在线更新')
+      const msg = `feat: 管理后台更新 — ${editQueue.map(e => e.field).join(', ')}`
+      const ok = await ghPut(FILE_PATH, newContent, msg)
       if (ok) {
-        siteData.raw = content
-        showToast('✅ 保存成功！网站将在 1-2 分钟内更新', 'success')
+        fileContent = newContent
+        editQueue = []
+        document.getElementById('change-count').textContent = '0 项修改'
+        document.querySelectorAll('.edit-changed').forEach(el => el.classList.remove('edit-changed'))
+        showToast('✅ 保存成功！网站正在重新部署', 'success')
       } else {
         showToast('❌ 保存失败，请检查 Token 权限', 'error')
       }
     }
 
-    function replaceValue(content, regex, newVal) {
-      return content.replace(regex, `$1${newVal}$2`)
-    }
-
-    function replaceWorkField(content, oldRaw, field, newVal) {
-      const regex = new RegExp(`(${field}['"]?\\s*[:=]\\s*['"])[^'"]+(['"])`)
-      const newRaw = oldRaw.replace(regex, `$1${newVal.replace(/['"]/g, '')}$2`)
-      return content.replace(oldRaw, newRaw)
-    }
-
-    function replaceStatValue(content, index, field, newVal) {
-      const statsRegex = /stats:\s*\[(.*?)\]/s
-      const m = content.match(statsRegex)
-      if (!m) return content
-      let statsBlock = m[1]
-      const items = statsBlock.match(/\{[^}]+\}/g) || []
-      if (items[index]) {
-        const oldItem = items[index]
-        const regex = new RegExp(`(${field}['"]?\\s*[:=]\\s*['"])[^'"]+(['"])`)
-        const newItem = oldItem.replace(regex, `$1${newVal.replace(/['"]/g, '')}$2`)
-        statsBlock = statsBlock.replace(oldItem, newItem)
-      }
-      return content.replace(m[0], `stats: [${statsBlock}]`)
-    }
-
     // ── Toast ──
     function showToast(msg, type = '') {
-      const el = document.getElementById('toast')
+      const el = document.getElementById('admin-toast')
       el.textContent = msg
-      el.className = 'toast ' + type
+      el.className = 'admin-toast ' + type
       el.classList.add('show')
       setTimeout(() => el.classList.remove('show'), 3000)
     }
+
+    // ── Init ──
+    document.getElementById('admin-entry').addEventListener('click', () => {
+      document.getElementById('login-modal').classList.add('open')
+    })
+
+    document.getElementById('login-modal').addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) e.currentTarget.classList.remove('open')
+    })
+
+    document.getElementById('editor-modal').addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) closeEditor()
+    })
   </script>
 </body>
 </html>
