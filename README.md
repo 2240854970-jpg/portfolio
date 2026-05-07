@@ -47,10 +47,47 @@ git push -u origin main
 
 之后每次修改提交到 GitHub，Vercel 会自动重新部署。
 
-## 编辑网站内容（核心）
+## 🚀 快速添加新作品（一键技能）
 
-**所有内容都在一个文件里：**
-打开 `src/data/site-data.js`
+以后有新产品的图片想加到作品集里，只需要一步：
+
+```bash
+node scripts/add-work.mjs "E:\产品图片文件夹路径"
+```
+
+工具会自动做这些事：
+1. 读取文件夹里所有图片
+2. 根据文件名识别图片类型（主图/功能图/场景图/尺寸图…）
+3. 为每张图生成专业的电商设计描述
+4. 复制图片到 `public/images/`
+5. 在 `site-data.js` 中生成完整的作品条目
+6. 自动构建并部署上线
+
+**图片文件名建议**（让描述更精准）：
+
+| 图片类型 | 文件名建议 |
+|---|---|
+| 白底主图 | `主图.jpg` 或 `1.jpg` |
+| 功能卖点 | `功能-调光.jpg` 或 `feature-无极.jpg` |
+| 尺寸图 | `尺寸.jpg` 或 `size.jpg` |
+| 场景氛围 | `场景-客厅.jpg` 或 `lifestyle-bedroom.jpg` |
+| 白天黑夜对比 | `白天黑夜.jpg` 或 `day-night.jpg` |
+| 多角度 | `角度-侧面.jpg` 或 `detail-back.jpg` |
+| 包装展示 | `包装.jpg` 或 `packaging-box.jpg` |
+| 视频素材 | `video-main.mp4` |
+
+**手动微调**（可选）：
+```bash
+node scripts/add-work.mjs "E:\图片路径" "自定义作品标题"
+```
+
+如果想在首页展示，打开 `src/data/site-data.js`，搜索 `featuredWorkIds`，把新作品的 id 加到数组最前面。
+
+---
+
+## 手动编辑网站内容
+
+所有内容集中在 `src/data/site-data.js`：
 
 | 你想做什么 | 找到哪里 |
 |---|---|
@@ -58,17 +95,17 @@ git push -u origin main
 | 改成就数字 | 搜索 `stats:` 数组 |
 | 增加作品 | 在 `works:` 数组里加一个新对象 |
 | 删除作品 | 删掉对应的 `{ }` |
-| 改作品详情 | 修改对应作品的 `detailSections:` |
+| 改作品详情 | 修改对应作品的 `showCase:` 描述 |
 | 添加视频作品 | 加一个 `type: 'video'` 的作品 |
 | 改工作经历 | 搜索 `experience:` |
 | 改评价 | 搜索 `testimonials:` |
 | 改联系方式 | 搜索 `socials:` 和 `email:` |
 
-改完后在项目目录执行：
+改完后：
 ```bash
 npm run build
 ```
-然后把新的 `dist/` 文件夹拖到 Vercel 替换即可。
+然后把新的 `dist/` 文件夹部署上线。
 
 ## 项目结构
 
