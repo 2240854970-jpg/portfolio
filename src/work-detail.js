@@ -1,6 +1,6 @@
 import gsap from 'gsap'
 import { siteData } from './data/site-data.js'
-import { setupNav, renderFooter, getWorkById } from './utils.js'
+import { setupNav, renderFooter, getWorkById, imgPath } from './utils.js'
 
 /* ============================================
    Loading
@@ -46,7 +46,7 @@ function renderDetail() {
   const heroVisual = document.getElementById('detail-hero-visual')
   if (heroVisual) {
     if (work.images && work.images.length > 0) {
-      heroVisual.innerHTML = `<img src="${work.images[0]}" alt="${work.title}" class="detail-hero-img" />`
+      heroVisual.innerHTML = `<img src="${imgPath(work.images[0])}" alt="${work.title}" class="detail-hero-img" />`
     } else {
       heroVisual.innerHTML = `
         <div class="detail-hero-placeholder" style="background:${work.bgGrad}">
@@ -97,7 +97,7 @@ function renderDetail() {
         }
         if (s.type === 'image') {
           return `<div class="detail-image-block reveal-up">
-            <img src="${s.src}" alt="${work.title}" loading="lazy" />
+            <img src="${imgPath(s.src)}" alt="${work.title}" loading="lazy" />
           </div>`
         }
         return ''
@@ -126,7 +126,7 @@ function renderDetail() {
       <div class="detail-gallery reveal-up">
         ${work.images.slice(1).map((img) => `
           <div class="detail-gallery-item">
-            <img src="${img}" alt="${work.title}" loading="lazy" />
+            <img src="${imgPath(img)}" alt="${work.title}" loading="lazy" />
           </div>
         `).join('')}
       </div>

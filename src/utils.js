@@ -66,6 +66,15 @@ export function renderContact(prefix = '') {
   }
 }
 
+/* ── 图片路径辅助（自动适配 base path） ── */
+export function imgPath(path) {
+  if (!path) return ''
+  // 如果已经是绝对 URL 或以 base 开头，不重复处理
+  if (path.startsWith('http://') || path.startsWith('https://')) return path
+  if (path.startsWith(import.meta.env.BASE_URL)) return path
+  return import.meta.env.BASE_URL + path
+}
+
 /* ── 渲染作品卡片（首页网格 / 作品集网格通用） ── */
 export function renderWorkCard(work) {
   const videoBadge = work.type === 'video'
@@ -77,7 +86,7 @@ export function renderWorkCard(work) {
       <div class="work-visual" style="--grad: ${work.bgGrad || 'linear-gradient(135deg, #1a1a3d, #6366f1)'}">
         <div class="work-visual-content">
           ${work.thumbnail
-            ? `<img src="${work.thumbnail}" alt="${work.title}" class="work-thumb-img" />`
+            ? `<img src="${imgPath(work.thumbnail)}" alt="${work.title}" class="work-thumb-img" />`
             : `<span class="work-icon">✦</span>`
           }
         </div>

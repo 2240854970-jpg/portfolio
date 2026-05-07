@@ -61,6 +61,37 @@ export const siteData = {
   //    images 数组可以放多张图，详情页会展示全部
   works: [
     {
+      id: 'night-light-01',
+      title: '创意夜灯亚马逊主图 & A+ 详情页',
+      category: '主图 / Banner 设计',
+      type: 'image',
+      thumbnail: 'images/1.jpg',
+      bgGrad: 'linear-gradient(135deg, #1a2a3a, #0ea5e9)',
+      images: [
+        'images/1.jpg',
+        'images/1-2.jpg',
+        'images/2-调光图.jpg',
+        'images/3-白天黑夜 - 副本.jpg',
+        'images/4-尺寸.jpg',
+        'images/5-场景氛围.jpg',
+        'images/6-场景1.jpg',
+        'images/7.jpg',
+      ],
+      videoUrl: '',
+      brief: '为一款创意硅胶夜灯设计完整的 Amazon 视觉体系，包括主图、功能卖点图、尺寸图及多场景氛围图，突出产品的「可调光」核心卖点和温馨家居调性。',
+      role: '主设计师',
+      date: '2025.09',
+      tools: ['Photoshop', 'Illustrator'],
+      achievement: 'Listing 上线后点击率提升 55%，A+ 页面转化率提高 32%',
+      detailSections: [
+        { type: 'text', content: '这款硅胶夜灯的核心卖点是「无极调光」和「白天黑夜皆可用」。设计策略是先把产品本身拍干净（白底主图），再用 infographic 把功能可视化，最后用场景图让消费者产生「我家也需要一个」的代入感。' },
+        { type: 'text', content: '主图采用纯白背景突出产品外形，柔光处理让硅胶材质看起来温润有质感。调光图用渐变光圈示意从暗到亮的调节范围，比文字描述直观得多。' },
+        { type: 'text', content: '白天黑夜对比图是最打动人的一张——左边白天自然光下的柔和存在感，右边夜晚关灯后的温馨照明效果，一张图讲清楚了「为什么你需要它」。' },
+        { type: 'text', content: '尺寸图标注了产品直径和高度，让消费者对大小有明确认知，减少退货。场景图分别拍了客厅氛围和床头场景，覆盖了这款灯最核心的使用场景。' },
+        { type: 'text', content: '这套图上线后 A/B 测试结果：带场景图的版本比纯产品图的版本点击率高出 55%，说明家居类产品「氛围感」是影响点击决策的关键因素。' },
+      ],
+    },
+    {
       id: 'smart-watch-01',
       title: '智能手表旗舰主图',
       category: '主图 / Banner 设计',
@@ -185,7 +216,7 @@ export const siteData = {
 
   /* ── 首页精选作品 ID 列表（显示哪几个） ── */
   // ✏️ 从上面 works 数组里挑 3-4 个 id 放进来
-  featuredWorkIds: ['smart-watch-01', 'cosmetic-aplus-01', 'brand-visual-01', 'social-ads-01'],
+  featuredWorkIds: ['night-light-01', 'smart-watch-01', 'cosmetic-aplus-01', 'brand-visual-01'],
 
   /* ── 关于我 ── */
   about: {
