@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>管理后台 — 作品集</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #0a0a0a; --bg-card: #111; --bg-input: #1a1a1a;
+      --text: #f0f0f0; --text-muted: #888; --text-dim: #555;
+      --accent: #c084fc; --border: rgba(255,255,255,0.08);
+      --radius: 8px; --transition: 0.3s ease;
+    }
+    body { font-family: 'Inter', 'Noto Sans SC', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+    input, textarea, select { font: inherit; color: var(--text); background: var(--bg-input); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 14px; width: 100%; outline: none; transition: border-color var(--transition); }
+    input:focus, textarea:focus, select:focus { border-color: var(--accent); }
+    textarea { resize: vertical; min-height: 80px; }
+    label { display: block; font-size: 13px; color: var(--text-muted); margin-bottom: 6px; font-weight: 500; }
+    .btn { padding: 10px 24px; border-radius: var(--radius); border: none; cursor: pointer; font-size: 14px; font-weight: 500; transition: all var(--transition); }
+    .btn-primary { background: var(--accent); color: #000; }
+    .btn-primary:hover { opacity: 0.85; }
+    .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+    .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-danger { background: #ef4444; color: #fff; }
+    .btn-danger:hover { opacity: 0.85; }
+    .container { max-width: 800px; margin: 0 auto; padding: 0 20px; }
+
+    /* Login */
+    #login-screen {
+      display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px;
+    }
+    .login-box {
+      width: 100%; max-width: 400px; padding: 40px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg-card);
+    }
+    .login-box h1 { font-size: 24px; margin-bottom: 8px; }
+    .login-box p { font-size: 14px; color: var(--text-muted); margin-bottom: 28px; }
+    .login-box .form-group { margin-bottom: 16px; }
+    .login-box .btn { width: 100%; margin-top: 8px; }
+    .login-error { color: #ef4444; font-size: 13px; margin-top: 8px; display: none; }
+
+    /* Dashboard */
+    #dashboard { display: none; padding: 40px 0; }
+    .admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
+    .admin-header h1 { font-size: 22px; font-weight: 600; }
+    .admin-header .btn { font-size: 13px; }
+    .section-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 20px; }
+    .section-card h2 { font-size: 16px; font-weight: 600; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+    .form-group { margin-bottom: 16px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .stat-group { display: grid; grid-template-columns: 1fr 2fr; gap: 8px; align-items: center; margin-bottom: 8px; padding: 8px; background: rgba(255,255,255,0.02); border-radius: 6px; }
+    .stat-group input { }
+    .toast {
+      position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+      padding: 14px 28px; border-radius: var(--radius); font-size: 14px;
+      background: #222; border: 1px solid var(--border); color: var(--text);
+      opacity: 0; transition: opacity 0.4s ease; pointer-events: none; z-index: 999;
+    }
+    .toast.show { opacity: 1; }
+    .toast.success { border-color: #22c55e; }
+    .toast.error { border-color: #ef4444; }
+
+    /* Token input */
+    .token-notice { font-size: 12px; color: var(--text-dim); margin-top: 4px; }
+
+    /* Work editor */
+    .work-item { background: rgba(255,255,255,0.02); border-radius: 8px; padding: 16px; margin-bottom: 12px; }
+    .work-item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .work-item-title { font-size: 14px; font-weight: 500; }
+    .work-item .btn { font-size: 12px; padding: 4px 12px; }
+    .work-detail { display: none; }
+    .work-detail.open { display: block; }
+    .showcase-item { background: rgba(255,255,255,0.02); border-radius: 6px; padding: 12px; margin-bottom: 8px; }
+    .showcase-item h4 { font-size: 13px; color: var(--text-muted); margin-bottom: 8px; }
+
+    @media (max-width: 600px) {
+      .form-row { grid-template-columns: 1fr; }
+      .stat-group { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ====== Login ====== -->
+  <div id="login-screen">
+    <div class="login-box">
+      <h1>✦ 管理后台</h1>
+      <p>登录后可在网站直接编辑内容</p>
+      <div class="form-group">
+        <label>管理密码</label>
+        <input type="password" id="admin-password" placeholder="请输入密码" />
+      </div>
+      <div class="form-group">
+        <label>GitHub Token</label>
+        <input type="password" id="github-token" placeholder="ghp_..." />
+        <div class="token-notice">需要 Contents 写入权限的 GitHub token</div>
+      </div>
+      <button class="btn btn-primary" onclick="handleLogin()">登录</button>
+      <div class="login-error" id="login-error">密码错误，请重试</div>
+    </div>
+  </div>
+
+  <!-- ====== Dashboard ====== -->
+  <div id="dashboard">
+    <div class="container">
+
+      <div class="admin-header">
+        <h1>✦ 管理后台</h1>
+        <div>
+          <button class="btn btn-outline" onclick="previewChanges()" style="margin-right:8px">预览</button>
+          <button class="btn btn-primary" onclick="saveAll()">💾 保存所有修改</button>
+        </div>
+      </div>
+
+      <!-- Personal Info -->
+      <div class="section-card" id="section-info">
+        <h2>个人信息</h2>
+        <div class="form-row">
+          <div class="form-group">
+            <label>姓名</label>
+            <input type="text" id="edit-name" />
+          </div>
+          <div class="form-group">
+            <label>英文名</label>
+            <input type="text" id="edit-nameEn" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>职位标题</label>
+          <input type="text" id="edit-title" />
+        </div>
+        <div class="form-group">
+          <label>标语</label>
+          <input type="text" id="edit-tagline" />
+        </div>
+        <div class="form-group">
+          <label>邮箱</label>
+          <input type="email" id="edit-email" />
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="section-card">
+        <h2>首页成就数据</h2>
+        <div id="stats-editor"></div>
+      </div>
+
+      <!-- Works -->
+      <div class="section-card">
+        <h2>作品管理</h2>
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px">展开作品，修改描述文字。改完点保存全部生效。</p>
+        <div id="works-editor"></div>
+      </div>
+
+      <!-- About Bio -->
+      <div class="section-card">
+        <h2>关于我 — 个人介绍</h2>
+        <div class="form-group"><label>第一段</label><textarea id="edit-bio1" rows="3"></textarea></div>
+        <div class="form-group"><label>第二段</label><textarea id="edit-bio2" rows="3"></textarea></div>
+        <div class="form-group"><label>第三段</label><textarea id="edit-bio3" rows="3"></textarea></div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const OWNER = '2240854970-jpg'
+    const REPO = 'portfolio'
+    const FILE_PATH = 'src/data/site-data.js'
+    const BRANCH = 'main'
+
+    let siteData = null
+    let fileSha = null
+    let githubToken = ''
+
+    // ── Login ──
+    async function handleLogin() {
+      const pwd = document.getElementById('admin-password').value
+      const token = document.getElementById('github-token').value
+      githubToken = token
+
+      // Read the file to verify password
+      const resp = await githubGet(FILE_PATH)
+      if (!resp) { showToast('无法连接到 GitHub，请检查 Token', 'error'); return }
+
+      const content = decodeBase64(resp.content)
+      fileSha = resp.sha
+
+      // Find password - look for email line and extract adminPassword
+      const pwdMatch = content.match(/adminPassword['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
+
+      if (!pwdMatch || pwdMatch[1] !== pwd) {
+        document.getElementById('login-error').style.display = 'block'
+        return
+      }
+
+      document.getElementById('login-error').style.display = 'none'
+      document.getElementById('login-screen').style.display = 'none'
+      document.getElementById('dashboard').style.display = 'block'
+
+      parseData(content)
+      renderForms()
+    }
+
+    // ── GitHub API ──
+    async function githubGet(path) {
+      try {
+        const r = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`, {
+          headers: { 'Authorization': `Bearer ${githubToken}`, 'Accept': 'application/vnd.github+json' }
+        })
+        return r.ok ? await r.json() : null
+      } catch { return null }
+    }
+
+    async function githubPut(path, content, message) {
+      const b64 = btoa(unescape(encodeURIComponent(content)))
+      const body = { message, content: b64, sha: fileSha, branch: BRANCH }
+      const r = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`, {
+        method: 'PUT',
+        headers: { 'Authorization': `Bearer ${githubToken}`, 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      })
+      const json = await r.json()
+      if (r.ok) fileSha = json.content.sha
+      return r.ok
+    }
+
+    function decodeBase64(str) {
+      try { return decodeURIComponent(escape(atob(str))) } catch { return atob(str) }
+    }
+
+    // ── Parse site-data.js ──
+    function parseData(content) {
+      // Extract values using regex
+      siteData = { raw: content }
+
+      const g = (re) => { const m = content.match(re); return m ? m[1] : '' }
+
+      siteData.name = g(/name['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
+      siteData.nameEn = g(/nameEn['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
+      siteData.title = g(/title['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
+      siteData.tagline = g(/tagline['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
+      siteData.email = g(/email['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
+      siteData.adminPassword = g(/adminPassword['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
+
+      // Stats
+      const statsRegex = /stats:\s*\[(.*?)\]/s
+      const statsMatch = content.match(statsRegex)
+      if (statsMatch) {
+        siteData.statsRaw = statsMatch[1]
+        const items = statsMatch[1].match(/\{[^}]+\}/g) || []
+        siteData.stats = items.map(item => ({
+          value: (item.match(/value['"]?\s*[:=]\s*['"]([^'"]+)['"]/) || [,''])[1],
+          label: (item.match(/label['"]?\s*[:=]\s*['"]([^'"]+)['"]/) || [,''])[1],
+          icon: (item.match(/icon['"]?\s*[:=]\s*['"]([^'"]+)['"]/) || [,''])[1],
+        }))
+      }
+
+      // Works
+      const worksRegex = /works:\s*\[(.*?)\],\s*\n\s*\/\*\s*── 首页精选/s
+      const worksMatch = content.match(worksRegex)
+      if (worksMatch) {
+        siteData.worksRaw = worksMatch[1]
+        // Extract each work object
+        const workBlocks = extractObjects(worksMatch[1])
+        siteData.works = workBlocks.map(block => ({
+          raw: block,
+          id: (block.match(/id['"]?\s*[:=]\s*['"]([^'"]+)['"]/) || [,''])[1],
+          title: (block.match(/title['"]?\s*[:=]\s*['"]([^'"]+)['"]/) || [,''])[1],
+          brief: (block.match(/brief['"]?\s*[:=]\s*['"]([^'"]+)['"]/) || [,''])[1],
+          designIntro: (block.match(/designIntro['"]?\s*[:=]\s*['"]([^'"]+)['"]/) || [,''])[1],
+          designResult: (block.match(/designResult['"]?\s*[:=]\s*['"]([^'"]+)['"]/) || [,''])[1],
+          showCase: extractShowCases(block),
+        }))
+      }
+
+      // Featured work IDs
+      const fw = content.match(/featuredWorkIds['"]?\s*[:=]\s*\[([^\]]+)\]/)
+      siteData.featuredWorkIds = fw ? fw[1].split(',').map(s => s.trim().replace(/['"]/g,'')) : []
+
+      // About bios
+      siteData.bio1 = g(/bio1['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
+      siteData.bio2 = g(/bio2['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
+      siteData.bio3 = g(/bio3['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
+    }
+
+    function extractObjects(str) {
+      const result = []
+      let depth = 0, start = -1
+      for (let i = 0; i < str.length; i++) {
+        if (str[i] === '{') { if (depth === 0) start = i; depth++ }
+        else if (str[i] === '}') { depth--; if (depth === 0 && start >= 0) { result.push(str.slice(start, i + 1)); start = -1 } }
+      }
+      return result
+    }
+
+    function extractShowCases(block) {
+      const scMatch = block.match(/showCase['"]?\s*[:=]\s*\[(.*?)\]\s*\},?\s*$/s)
+      if (!scMatch) return []
+      const items = extractObjects(scMatch[1])
+      return items.map(item => ({
+        raw: item,
+        src: (item.match(/src['"]?\s*[:=]\s*['"]([^'"]+)['"]/) || [,''])[1],
+        title: (item.match(/title['"]?\s*[:=]\s*['"]([^'"]+)['"]/) || [,''])[1],
+        desc: (item.match(/desc['"]?\s*[:=]\s*['"]([^'"]+)['"]/) || [,''])[1],
+      }))
+    }
+
+    // ── Render Forms ──
+    function renderForms() {
+      if (!siteData) return
+
+      // Info
+      document.getElementById('edit-name').value = siteData.name || ''
+      document.getElementById('edit-nameEn').value = siteData.nameEn || ''
+      document.getElementById('edit-title').value = siteData.title || ''
+      document.getElementById('edit-tagline').value = siteData.tagline || ''
+      document.getElementById('edit-email').value = siteData.email || ''
+
+      // Stats
+      const statsEl = document.getElementById('stats-editor')
+      statsEl.innerHTML = ''
+      if (siteData.stats) {
+        siteData.stats.forEach((stat, i) => {
+          const div = document.createElement('div')
+          div.className = 'stat-group'
+          div.innerHTML = `
+            <input type="text" class="stat-value" value="${stat.value}" data-idx="${i}" />
+            <input type="text" class="stat-label" value="${stat.label}" data-idx="${i}" />
+          `
+          statsEl.appendChild(div)
+        })
+      }
+
+      // Works
+      const worksEl = document.getElementById('works-editor')
+      worksEl.innerHTML = ''
+      if (siteData.works) {
+        siteData.works.forEach((work, i) => {
+          const div = document.createElement('div')
+          div.className = 'work-item'
+          div.innerHTML = `
+            <div class="work-item-header">
+              <span class="work-item-title">${work.title || '未命名作品'}</span>
+              <button class="btn btn-outline" onclick="toggleWork(${i})">展开编辑</button>
+            </div>
+            <div class="work-detail" id="work-detail-${i}">
+              <div class="form-group">
+                <label>Brief（简介）</label>
+                <textarea class="work-brief" data-idx="${i}" rows="2">${work.brief || ''}</textarea>
+              </div>
+              <div class="form-group">
+                <label>Design Intro（设计思路）</label>
+                <textarea class="work-intro" data-idx="${i}" rows="3">${work.designIntro || ''}</textarea>
+              </div>
+              ${(work.showCase || []).map((sc, si) => `
+                <div class="showcase-item">
+                  <h4>图 ${si + 1}: ${sc.title || ''}</h4>
+                  <div class="form-group">
+                    <label>描述</label>
+                    <textarea class="showcase-desc" data-work="${i}" data-showcase="${si}" rows="2">${sc.desc || ''}</textarea>
+                  </div>
+                </div>
+              `).join('')}
+              <div class="form-group">
+                <label>Design Result（成果数据）</label>
+                <textarea class="work-result" data-idx="${i}" rows="2">${work.designResult || ''}</textarea>
+              </div>
+            </div>
+          `
+          worksEl.appendChild(div)
+        })
+      }
+
+      // About
+      document.getElementById('edit-bio1').value = siteData.bio1 || ''
+      document.getElementById('edit-bio2').value = siteData.bio2 || ''
+      document.getElementById('edit-bio3').value = siteData.bio3 || ''
+    }
+
+    function toggleWork(i) {
+      const el = document.getElementById(`work-detail-${i}`)
+      el.classList.toggle('open')
+    }
+
+    // ── Preview ──
+    function previewChanges() {
+      window.open('https://2240854970-jpg.github.io/portfolio/', '_blank')
+    }
+
+    // ── Save ──
+    async function saveAll() {
+      showToast('正在保存...')
+
+      // Build updated content
+      let content = siteData.raw
+
+      // Update personal info
+      content = replaceValue(content, /(name['"]?\s*[:=]\s*['"])[^'"]+(['"])/, document.getElementById('edit-name').value)
+      content = replaceValue(content, /(nameEn['"]?\s*[:=]\s*['"])[^'"]+(['"])/, document.getElementById('edit-nameEn').value)
+      content = replaceValue(content, /(title['"]?\s*[:=]\s*['"])[^'"]+(['"])/, document.getElementById('edit-title').value)
+      content = replaceValue(content, /(tagline['"]?\s*[:=]\s*['"])[^'"]+(['"])/, document.getElementById('edit-tagline').value)
+      content = replaceValue(content, /(email['"]?\s*[:=]\s*['"])[^'"]+(['"])/, document.getElementById('edit-email').value)
+
+      // Update stats
+      const statInputs = document.querySelectorAll('.stat-value')
+      statInputs.forEach(input => {
+        const i = parseInt(input.dataset.idx)
+        content = replaceStatValue(content, i, 'value', input.value)
+      })
+      const statLabels = document.querySelectorAll('.stat-label')
+      statLabels.forEach(input => {
+        const i = parseInt(input.dataset.idx)
+        content = replaceStatValue(content, i, 'label', input.value)
+      })
+
+      // Update work fields
+      document.querySelectorAll('.work-brief').forEach(el => {
+        const i = parseInt(el.dataset.idx)
+        if (siteData.works[i]) content = replaceWorkField(content, siteData.works[i].raw, 'brief', el.value)
+      })
+      document.querySelectorAll('.work-intro').forEach(el => {
+        const i = parseInt(el.dataset.idx)
+        if (siteData.works[i]) content = replaceWorkField(content, siteData.works[i].raw, 'designIntro', el.value)
+      })
+      document.querySelectorAll('.work-result').forEach(el => {
+        const i = parseInt(el.dataset.idx)
+        if (siteData.works[i]) content = replaceWorkField(content, siteData.works[i].raw, 'designResult', el.value)
+      })
+      document.querySelectorAll('.showcase-desc').forEach(el => {
+        const wi = parseInt(el.dataset.work)
+        const si = parseInt(el.dataset.showcase)
+        if (siteData.works[wi] && siteData.works[wi].showCase[si]) {
+          content = replaceWorkField(content, siteData.works[wi].showCase[si].raw, 'desc', el.value)
+        }
+      })
+
+      // Update about bios
+      content = replaceValue(content, /(bio1['"]?\s*[:=]\s*['"])[^'"]+(['"])/, document.getElementById('edit-bio1').value)
+      content = replaceValue(content, /(bio2['"]?\s*[:=]\s*['"])[^'"]+(['"])/, document.getElementById('edit-bio2').value)
+      content = replaceValue(content, /(bio3['"]?\s*[:=]\s*['"])[^'"]+(['"])/, document.getElementById('edit-bio3').value)
+
+      // Save to GitHub
+      const ok = await githubPut(FILE_PATH, content, 'feat: 管理后台在线更新')
+      if (ok) {
+        siteData.raw = content
+        showToast('✅ 保存成功！网站将在 1-2 分钟内更新', 'success')
+      } else {
+        showToast('❌ 保存失败，请检查 Token 权限', 'error')
+      }
+    }
+
+    function replaceValue(content, regex, newVal) {
+      return content.replace(regex, `$1${newVal}$2`)
+    }
+
+    function replaceWorkField(content, oldRaw, field, newVal) {
+      const regex = new RegExp(`(${field}['"]?\\s*[:=]\\s*['"])[^'"]+(['"])`)
+      const newRaw = oldRaw.replace(regex, `$1${newVal.replace(/['"]/g, '')}$2`)
+      return content.replace(oldRaw, newRaw)
+    }
+
+    function replaceStatValue(content, index, field, newVal) {
+      const statsRegex = /stats:\s*\[(.*?)\]/s
+      const m = content.match(statsRegex)
+      if (!m) return content
+      let statsBlock = m[1]
+      const items = statsBlock.match(/\{[^}]+\}/g) || []
+      if (items[index]) {
+        const oldItem = items[index]
+        const regex = new RegExp(`(${field}['"]?\\s*[:=]\\s*['"])[^'"]+(['"])`)
+        const newItem = oldItem.replace(regex, `$1${newVal.replace(/['"]/g, '')}$2`)
+        statsBlock = statsBlock.replace(oldItem, newItem)
+      }
+      return content.replace(m[0], `stats: [${statsBlock}]`)
+    }
+
+    // ── Toast ──
+    function showToast(msg, type = '') {
+      const el = document.getElementById('toast')
+      el.textContent = msg
+      el.className = 'toast ' + type
+      el.classList.add('show')
+      setTimeout(() => el.classList.remove('show'), 3000)
+    }
+  </script>
+</body>
+</html>

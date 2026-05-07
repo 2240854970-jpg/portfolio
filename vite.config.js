@@ -12,6 +12,7 @@ export default defineConfig({
         works: resolve(__dirname, 'works.html'),
         'work-detail': resolve(__dirname, 'work-detail.html'),
         about: resolve(__dirname, 'about.html'),
+        admin: resolve(__dirname, 'admin.html'),
       },
     },
   },

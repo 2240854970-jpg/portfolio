@@ -1,0 +1,27 @@
+{
+  "name": "李龙",
+  "nameEn": "Li Long",
+  "title": "资深视觉设计师 / 视觉组长",
+  "tagline": "深耕小夜灯赛道 · Amazon Top 100 中 50+ 产品视觉经手",
+  "email": "lilong.design@example.com",
+  "adminPassword": "admin888",
+  "nav": [
+    { "label": "首页", "href": "index.html" },
+    { "label": "作品", "href": "works.html" },
+    { "label": "关于我", "href": "about.html" },
+    { "label": "联系", "href": "index.html#contact" }
+  ],
+  "stats": [
+    { "value": "50+", "label": "Amazon Top 100 产品视觉经手", "icon": "✦" },
+    { "value": "80%", "label": "主图 A/B 测试胜出率", "icon": "▲" },
+    { "value": "107", "label": "单月最高 A+ 产出（套）", "icon": "◆" },
+    { "value": "70%", "label": "新人培养周期缩短", "icon": "●" }
+  ],
+  "categories": ["全部", "主图 / Banner 设计", "详情页设计", "品牌视觉", "AI 工作流", "视频作品"],
+  "works": [],
+  "featuredWorkIds": [],
+  "highlights": [],
+  "about": {},
+  "socials": [],
+  "footer": ""
+}

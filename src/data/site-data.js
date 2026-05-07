@@ -24,6 +24,7 @@ export const siteData = {
   tagline: '深耕小夜灯赛道 · Amazon Top 100 中 50+ 产品视觉经手',
   email: 'lilong.design@example.com',
   avatar: '/images/avatar-placeholder.svg',
+  adminPassword: 'admin888',
 
   /* ── 导航 ── */
   nav: [
