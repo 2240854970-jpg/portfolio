@@ -1,0 +1,21 @@
+import { defineConfig } from 'vite'
+import { resolve } from 'path'
+
+export default defineConfig({
+  root: '.',
+  build: {
+    outDir: 'dist',
+    rollupOptions: {
+      input: {
+        main: resolve(__dirname, 'index.html'),
+        works: resolve(__dirname, 'works.html'),
+        'work-detail': resolve(__dirname, 'work-detail.html'),
+        about: resolve(__dirname, 'about.html'),
+      },
+    },
+  },
+  server: {
+    port: 3000,
+    host: true,
+  },
+})
