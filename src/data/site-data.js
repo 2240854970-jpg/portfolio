@@ -18,11 +18,11 @@ export const siteData = {
 
   /* ── 个人信息 ── */
   // ✏️ 改成你的名字和职位
-  name: '陈一铭',
-  nameEn: 'Yiming Chen',
+  name: '李龙',
+  nameEn: 'Li Long',
   title: '跨境电商平面设计师',
   tagline: '用设计让产品在货架上自己说话',
-  email: 'yiming.chen@example.com',
+  email: 'lilong.design@example.com',
   avatar: '/images/avatar-placeholder.svg',  // ✏️ 替换为你的头像
 
   /* ── 导航 ── */
@@ -255,12 +255,12 @@ export const siteData = {
     // ✏️ 客户 / 合作方评价
     testimonials: [
       {
-        quote: '陈一铭是我合作过最懂「转化」的设计师。他不只是把图做漂亮，而是真的理解消费者在电商页面上的浏览习惯，每一张图都有策略。',
+        quote: '李龙是我合作过最懂「转化」的设计师。他不只是把图做漂亮，而是真的理解消费者在电商页面上的浏览习惯，每一张图都有策略。',
         author: '李总',
         role: '某出海品牌 CEO',
       },
       {
-        quote: '我们在 3 个月内换了 4 个设计师都不满意，直到和一铭合作。他对品牌的理解深度和交付速度都让人印象深刻。',
+        quote: '我们在 3 个月内换了 4 个设计师都不满意，直到和李龙合作。他对品牌的理解深度和交付速度都让人印象深刻。',
         author: '王女士',
         role: '某品牌运营负责人',
       },
@@ -277,5 +277,5 @@ export const siteData = {
   ],
 
   /* ── 页脚 ── */
-  footer: '© 2026 陈一铭 — 用心设计每一个像素',
+  footer: '© 2026 李龙 — 用心设计每一个像素',
 }
