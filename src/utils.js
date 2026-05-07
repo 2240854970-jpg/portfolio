@@ -66,13 +66,15 @@ export function renderContact(prefix = '') {
   }
 }
 
-/* ── 图片路径辅助（自动适配 base path） ── */
+/* ── 图片路径辅助（使用 jsDelivr CDN 加速国内访问） ── */
 export function imgPath(path) {
   if (!path) return ''
-  // 如果已经是绝对 URL 或以 base 开头，不重复处理
+  // 已经是完整 URL 的不处理
   if (path.startsWith('http://') || path.startsWith('https://')) return path
   if (path.startsWith(import.meta.env.BASE_URL)) return path
-  return import.meta.env.BASE_URL + path
+  // 图片用 jsDelivr CDN（有国内节点，访问更快）
+  const CDN = 'https://cdn.jsdelivr.net/gh/2240854970-jpg/portfolio@gh-pages/'
+  return CDN + path
 }
 
 /* ── 渲染作品卡片（首页网格 / 作品集网格通用） ── */
