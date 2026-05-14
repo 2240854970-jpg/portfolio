@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>管理后台 — 作品集</title>
+  <link rel="stylesheet" crossorigin href="/assets/admin-Wgw2DwaS.css">
+  <link rel="stylesheet" crossorigin href="/assets/style-7sLpRoMq.css">
+</head>
+<body>
+
+  <!-- ====== Admin Entry Button ====== -->
+  <button class="admin-enter-btn" id="admin-entry" title="管理后台">✦</button>
+
+  <!-- ====== Login Modal ====== -->
+  <div class="admin-modal-overlay" id="login-modal">
+    <div class="admin-modal">
+      <h2>✦ 管理后台</h2>
+      <p>登录后可直接在页面编辑内容</p>
+      <div class="form-group">
+        <label>管理密码</label>
+        <input type="password" id="admin-pwd" placeholder="请输入密码" />
+      </div>
+      <div class="form-group">
+        <label>GitHub Token</label>
+        <input type="password" id="admin-token" placeholder="ghp_..." />
+      </div>
+      <button class="btn" onclick="adminLogin()">登录</button>
+      <div class="admin-error" id="admin-error">密码错误，请重试</div>
+    </div>
+  </div>
+
+  <!-- ====== Site Preview (rendered by JS) ====== -->
+  <div id="site-preview"></div>
+
+  <!-- ====== Inline Editor Modal ====== -->
+  <div class="inline-editor-overlay" id="editor-modal">
+    <div class="inline-editor">
+      <h3 id="editor-title">编辑</h3>
+      <div id="editor-fields"></div>
+      <div class="inline-editor-actions">
+        <button class="btn btn-editor-cancel" onclick="closeEditor()">取消</button>
+        <button class="btn btn-editor-save" onclick="saveEditor()">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== Toast ====== -->
+  <div class="admin-toast" id="admin-toast"></div>
+
+  <script>
+    const OWNER = '2240854970-jpg'
+    const REPO = 'portfolio'
+    const FILE_PATH = 'src/data/site-data.js'
+    const BRANCH = 'main'
+
+    let siteData = null
+    let fileContent = ''
+    let fileSha = ''
+    let gitToken = ''
+    let editQueue = []
+    let currentEditField = null
+
+    // ── GitHub API ──
+    async function gh(path) {
+      const r = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`, {
+        headers: { 'Authorization': `Bearer ${gitToken}`, 'Accept': 'application/vnd.github+json' }
+      })
+      return r.ok ? await r.json() : null
+    }
+
+    async function ghPut(path, content, msg) {
+      const b64 = btoa(unescape(encodeURIComponent(content)))
+      const r = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`, {
+        method: 'PUT',
+        headers: { 'Authorization': `Bearer ${gitToken}`, 'Accept': 'application/vnd.github+json`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: msg, content: b64, sha: fileSha, branch: BRANCH })
+      })
+      if (r.ok) { const j = await r.json(); fileSha = j.content.sha }
+      return r.ok
+    }
+
+    function decode(b64) {
+      try { return decodeURIComponent(escape(atob(b64))) } catch { return atob(b64) }
+    }
+
+    // ── Login ──
+    async function adminLogin() {
+      const pwd = document.getElementById('admin-pwd').value
+      gitToken = document.getElementById('admin-token').value
+      const resp = await gh(FILE_PATH)
+      if (!resp) { showToast('无法连接 GitHub', 'error'); return }
+      fileContent = decode(resp.content)
+      fileSha = resp.sha
+      const pm = fileContent.match(/adminPassword['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
+      if (!pm || pm[1] !== pwd) { document.getElementById('admin-error').style.display = 'block'; return }
+      document.getElementById('admin-error').style.display = 'none'
+      document.getElementById('login-modal').classList.remove('open')
+      document.body.classList.add('edit-mode')
+      document.querySelector('.admin-toolbar')?.classList.add('open')
+      renderSite()
+    }
+
+    // ── Render Site Preview ──
+    function renderSite() {
+      // Parse data
+      const g = (re) => { const m = fileContent.match(re); return m ? m[1].trim() : '' }
+      const name = g(/name['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
+      const title = g(/title['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
+      const tagline = g(/tagline['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
+      const email = g(/email['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
+      const footer = g(/footer['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
+
+      const statsBlock = fileContent.match(/stats:\s*\[(.*?)\]/s)
+      const stats = statsBlock ? [...statsBlock[1].matchAll(/\{([^}]+)\}/g)].map(m => {
+        const v = m[1].match(/value['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
+        const l = m[1].match(/label['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
+        const i = m[1].match(/icon['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
+        return { value: v ? v[1] : '', label: l ? l[1] : '', icon: i ? i[1] : '' }
+      }) : []
+
+      const highlightsBlock = fileContent.match(/highlights:\s*\[(.*?)\]\s*\],/s)
+      const highlights = highlightsBlock ? [...highlightsBlock[1].matchAll(/\{([^}]+)\}/g)].map(m => {
+        const ic = m[1].match(/icon['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
+        const la = m[1].match(/label['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
+        const d = m[1].match(/desc['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
+        return { icon: ic ? ic[1] : '', label: la ? la[1] : '', desc: d ? d[1] : '' }
+      }) : []
+
+      const bio1 = g(/bio1['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
+      const bio2 = g(/bio2['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
+      const bio3 = g(/bio3['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
+
+      const socialsMatch = fileContent.match(/socials:\s*\[(.*?)\]\s*\],/s)
+      const socials = socialsMatch ? [...socialsMatch[1].matchAll(/\{([^}]+)\}/g)].map(m => {
+        const n = m[1].match(/name['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
+        const u = m[1].match(/url['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
+        return { name: n ? n[1] : '', url: u ? u[1] : '' }
+      }) : []
+
+      // ── Build HTML ──
+      const html = `
+        <!-- Hero -->
+        <section class="hero" style="height:80vh;min-height:500px">
+          <div class="hero-overlay"></div>
+          <div class="hero-content">
+            <div class="hero-text">
+              <p class="hero-label" style="opacity:1">Portfolio · 跨境电商平面设计</p>
+              <h1 class="hero-title" style="font-size:clamp(36px,6vw,72px)">
+                <span class="hero-line" style="overflow:visible">
+                  <span data-field="name" class="edit-overlay" style="display:inline-block">${name}</span>
+                </span>
+                <span class="hero-line" style="font-size:0.5em;font-weight:400;overflow:visible">
+                  <span data-field="title" class="edit-overlay" style="display:inline-block">${title}</span>
+                </span>
+              </h1>
+              <p class="hero-sub" style="opacity:1;transform:none">
+                <span data-field="tagline" class="edit-overlay" style="display:inline-block">${tagline}</span>
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Stats -->
+        <section class="section stats-section">
+          <div class="container">
+            <div class="stats-grid">
+              ${stats.map((s, i) => `
+                <div class="stat-item edit-overlay" style="opacity:1;transform:none" data-stat="${i}">
+                  <span class="stat-icon">${s.icon}</span>
+                  <span class="stat-value" data-field="stat-${i}-value">${s.value}</span>
+                  <span class="stat-label" data-field="stat-${i}-label">${s.label}</span>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </section>
+
+        <!-- Highlights -->
+        <section class="section highlights-section">
+          <div class="container">
+            <div class="section-header">
+              <h2 class="section-title"><span class="section-number">✦</span><span class="section-heading">核心价值</span></h2>
+            </div>
+            <div class="highlights-grid">
+              ${highlights.map((h, i) => `
+                <div class="highlight-card edit-overlay" style="opacity:1;transform:none" data-highlight="${i}">
+                  <span class="highlight-icon">${h.icon}</span>
+                  <h3 class="highlight-title" data-field="hl-${i}-label">${h.label}</h3>
+                  <p class="highlight-desc" data-field="hl-${i}-desc">${h.desc}</p>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </section>
+
+        <!-- About Brief -->
+        <section class="section about-brief-section">
+          <div class="container">
+            <div class="about-brief" style="opacity:1;transform:none">
+              <div class="about-brief-text">
+                <h2 class="section-title"><span class="section-number">✦</span><span class="section-heading">关于我</span></h2>
+                <p class="about-brief-p edit-overlay" data-field="bio1">${bio1}</p>
+                <p class="about-brief-p edit-overlay" data-field="bio2">${bio2}</p>
+                <p class="about-brief-p edit-overlay" data-field="bio3">${bio3}</p>
+              </div>
+              <div class="about-brief-visual">
+                <div class="about-avatar-frame">
+                  <div class="about-avatar-placeholder"><span class="avatar-icon">✦</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Contact -->
+        <section class="section contact-section">
+          <div class="container">
+            <div class="contact-inner" style="opacity:1;transform:none">
+              <h2 class="section-title" style="justify-content:center">
+                <span class="section-number">✦</span>
+                <span class="section-heading">联系我</span>
+              </h2>
+              <p class="contact-text edit-overlay" data-field="email" style="opacity:1">有兴趣聊一聊？给我发邮件吧</p>
+              <a class="contact-email" style="opacity:1">
+                <span class="email-text" data-field="email">${email}</span>
+                <span class="email-arrow">→</span>
+              </a>
+              <div class="contact-socials">
+                ${socials.map(s => `<a class="social-link">${s.name}</a>`).join('')}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+          <div class="container">
+            <div class="footer-inner">
+              <span class="footer-copy" data-field="footer">${footer}</span>
+              <a class="footer-top">↑ 回到顶部</a>
+            </div>
+          </div>
+        </footer>
+
+        <!-- Admin Toolbar -->
+        <div class="admin-toolbar open">
+          <span class="admin-toolbar-status">已登录 · <span class="has-changes" id="change-count">0 项修改</span></span>
+          <div class="admin-toolbar-actions">
+            <button class="btn btn-admin-cancel" onclick="resetChanges()">重置</button>
+            <button class="btn btn-admin-save" onclick="saveAll()">💾 保存部署</button>
+          </div>
+        </div>
+      `
+
+      document.getElementById('site-preview').innerHTML = html
+      bindEditButtons()
+    }
+
+    // ── Edit System ──
+    function bindEditButtons() {
+      document.querySelectorAll('[data-field]').forEach(el => {
+        el.style.cursor = 'pointer'
+        el.title = '点击编辑'
+        el.addEventListener('click', (e) => {
+          e.stopPropagation()
+          openFieldEditor(el.dataset.field, el.textContent.trim())
+        })
+      })
+    }
+
+    function openFieldEditor(field, currentValue) {
+      currentEditField = field
+      document.getElementById('editor-title').textContent = `编辑 — ${field}`
+      document.getElementById('editor-fields').innerHTML = `
+        <label>内容</label>
+        <textarea id="editor-value" rows="4">${currentValue}</textarea>
+      `
+      document.getElementById('editor-modal').classList.add('open')
+    }
+
+    function closeEditor() {
+      document.getElementById('editor-modal').classList.remove('open')
+      currentEditField = null
+    }
+
+    function saveEditor() {
+      const val = document.getElementById('editor-value').value
+      const field = currentEditField
+      if (!field) return
+
+      // Update display
+      document.querySelectorAll(`[data-field="${field}"]`).forEach(el => {
+        el.textContent = val
+        el.classList.add('edit-changed')
+      })
+
+      // Track change
+      const existing = editQueue.find(e => e.field === field)
+      if (existing) existing.value = val
+      else editQueue.push({ field, value: val })
+
+      document.getElementById('change-count').textContent = `${editQueue.length} 项修改`
+      closeEditor()
+    }
+
+    function resetChanges() {
+      editQueue = []
+      document.querySelectorAll('.edit-changed').forEach(el => el.classList.remove('edit-changed'))
+      document.getElementById('change-count').textContent = '0 项修改'
+      showToast('已重置')
+    }
+
+    // ── Save to GitHub ──
+    async function saveAll() {
+      if (editQueue.length === 0) { showToast('没有修改需要保存', 'error'); return }
+      showToast('正在保存到 GitHub...')
+
+      let newContent = fileContent
+      for (const { field, value } of editQueue) {
+        const escaped = value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+        const re = new RegExp(`(${field}['"]?\\s*[:=]\\s*['"])[^'"]+(['"])`)
+        newContent = newContent.replace(re, `$1${escaped}$2`)
+      }
+
+      const msg = `feat: 管理后台更新 — ${editQueue.map(e => e.field).join(', ')}`
+      const ok = await ghPut(FILE_PATH, newContent, msg)
+      if (ok) {
+        fileContent = newContent
+        editQueue = []
+        document.getElementById('change-count').textContent = '0 项修改'
+        document.querySelectorAll('.edit-changed').forEach(el => el.classList.remove('edit-changed'))
+        showToast('✅ 保存成功！网站正在重新部署', 'success')
+      } else {
+        showToast('❌ 保存失败，请检查 Token 权限', 'error')
+      }
+    }
+
+    // ── Toast ──
+    function showToast(msg, type = '') {
+      const el = document.getElementById('admin-toast')
+      el.textContent = msg
+      el.className = 'admin-toast ' + type
+      el.classList.add('show')
+      setTimeout(() => el.classList.remove('show'), 3000)
+    }
+
+    // ── Init ──
+    document.getElementById('admin-entry').addEventListener('click', () => {
+      document.getElementById('login-modal').classList.add('open')
+    })
+
+    document.getElementById('login-modal').addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) e.currentTarget.classList.remove('open')
+    })
+
+    document.getElementById('editor-modal').addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) closeEditor()
+    })
+  </script>
+</body>
+</html>
