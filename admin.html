@@ -4,671 +4,692 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>管理后台 — 作品集</title>
+  <style>
+    /* Admin overlay styles — keep lightweight */
+    /* Clickable area highlight */
+    [data-editable] { cursor:pointer; position:relative; transition:outline .15s; }
+    [data-editable]:hover { outline:1px dashed rgba(192,132,252,.35); outline-offset:2px; border-radius:4px; }
+    body.edit-mode [data-editable]:hover { outline-color:rgba(192,132,252,.55); }
+
+    /* Admin entry button */
+    .admin-entry-fab { position:fixed; bottom:20px; left:20px; z-index:99999; width:40px; height:40px; border-radius:50%;
+      background:rgba(192,132,252,.15); border:1px solid rgba(192,132,252,.25); color:#c084fc; font-size:16px;
+      cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:.5; transition:all .3s; }
+    .admin-entry-fab:hover { opacity:1; background:rgba(192,132,252,.25); }
+
+    /* Top bar */
+    .admin-bar { position:sticky; top:0; z-index:99990; display:flex; align-items:center; justify-content:space-between;
+      padding:10px 24px; background:rgba(10,10,10,.92); backdrop-filter:blur(20px); border-bottom:1px solid rgba(192,132,252,.08); }
+    .admin-bar-logo { font-family:'Space Grotesk','Noto Sans SC',sans-serif; font-size:15px; color:#c084fc; font-weight:600; }
+    .admin-bar-tabs { display:flex; gap:2px; }
+    .admin-bar-tab { padding:8px 18px; border-radius:8px; font-size:13px; color:#888; background:transparent; border:none; cursor:pointer; transition:all .2s; }
+    .admin-bar-tab:hover { color:#ddd; }
+    .admin-bar-tab.active { color:#c084fc; background:rgba(192,132,252,.08); }
+    .admin-bar-save { padding:8px 20px; border:none; border-radius:8px; background:#22c55e; color:#000; font-weight:700; font-size:13px; cursor:pointer; }
+    .admin-bar-save:hover { opacity:.85; }
+    .admin-bar-status { font-size:12px; color:#888; margin-right:12px; }
+
+    /* Edit modal overlay — reuse admin.css modal classes but customize */
+    .ae-overlay { position:fixed; inset:0; z-index:99995; background:rgba(0,0,0,.75); backdrop-filter:blur(8px);
+      display:none; align-items:center; justify-content:center; }
+    .ae-overlay.open { display:flex; }
+    .ae-modal { width:100%; max-width:580px; max-height:80vh; overflow-y:auto; padding:28px; border-radius:16px;
+      border:1px solid rgba(255,255,255,.08); background:#0f0f0f; }
+    .ae-modal h3 { font-family:'Space Grotesk','Noto Sans SC',sans-serif; font-size:20px; margin-bottom:20px; color:#c084fc; }
+    .ae-field { margin-bottom:14px; }
+    .ae-field label { display:block; font-size:12px; color:#888; margin-bottom:4px; letter-spacing:.04em; }
+    .ae-field input, .ae-field textarea, .ae-field select {
+      width:100%; padding:10px 14px; border-radius:8px; border:1px solid rgba(255,255,255,.08);
+      background:rgba(255,255,255,.04); color:#f0f0f0; font-size:13px; outline:none; box-sizing:border-box; }
+    .ae-field textarea { resize:vertical; min-height:80px; }
+    .ae-field input:focus, .ae-field textarea:focus { border-color:#c084fc; }
+    .ae-actions { display:flex; gap:8px; margin-top:20px; }
+    .ae-btn { padding:10px 24px; border-radius:8px; border:none; font-size:14px; font-weight:600; cursor:pointer; }
+    .ae-btn-primary { background:#c084fc; color:#000; }
+    .ae-btn-cancel { background:rgba(255,255,255,.06); color:#888; }
+    .ae-btn-delete { background:transparent; color:#ef4444; border:1px solid #ef4444; }
+    .ae-btn-sm { padding:4px 10px; border-radius:4px; border:1px solid rgba(255,255,255,.08); background:transparent; color:#888; font-size:11px; cursor:pointer; }
+    .ae-btn-sm:hover { border-color:#c084fc; color:#c084fc; }
+    .ae-btn-sm.danger:hover { border-color:#ef4444; color:#ef4444; }
+
+    /* Page panels */
+    .admin-page { display:none; }
+    .admin-page.active { display:block; }
+
+    /* File upload */
+    .file-grid { display:flex; flex-wrap:wrap; gap:10px; }
+    .file-item { text-align:center; }
+    .file-item img, .file-item video { width:110px; height:110px; object-fit:cover; border-radius:8px; border:1px solid rgba(255,255,255,.08); }
+    .file-item .fn { font-size:11px; color:#888; margin-top:4px; max-width:110px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; cursor:pointer; }
+    .file-item .fn:hover { color:#c084fc; text-decoration:underline; }
+
+    /* Toast */
+    .admin-toast { position:fixed; bottom:80px; left:50%; transform:translateX(-50%); z-index:99999; padding:10px 24px;
+      border-radius:8px; font-size:13px; opacity:0; transition:opacity .3s; pointer-events:none; }
+    .admin-toast.show { opacity:1; pointer-events:auto; }
+    .admin-toast { background:#1a1a2a; color:#ddd; border:1px solid #333; }
+    .admin-toast.success { border-color:#22c55e; color:#22c55e; }
+    .admin-toast.error { border-color:#ef4444; color:#ef4444; }
+
+    /* Hide admin elements on public site */
+    .admin-entry-fab, .admin-bar { display:none; }
+    body.logged-in .admin-entry-fab { display:none; }
+    body.logged-in .admin-bar { display:flex; }
+    body:not(.logged-in) .admin-entry-fab { display:flex; }
+  </style>
   <link rel="stylesheet" crossorigin href="/assets/admin-Wgw2DwaS.css">
   <link rel="stylesheet" crossorigin href="/assets/style-7sLpRoMq.css">
 </head>
-<body style="background:#08080c;color:#ddd;font-family:'Noto Sans SC',sans-serif;margin:0">
+<body id="admin-body">
 
-<!-- ====== Login ====== -->
-<div class="admin-modal-overlay" id="login-modal" style="display:flex">
-  <div class="admin-modal">
-    <h2>✦ 管理后台</h2>
-    <p>登录后可视化编辑全站内容</p>
-    <div class="form-group"><label>管理密码</label><input type="password" id="admin-pwd" placeholder="请输入密码" /></div>
-    <div class="form-group"><label>GitHub Token</label><input type="password" id="admin-token" placeholder="ghp_..." /></div>
-    <button class="btn" onclick="adminLogin()">登录</button>
-    <div class="admin-error" id="admin-error">密码错误，请重试</div>
-  </div>
-</div>
-
-<!-- ====== Main CMS ====== -->
-<div id="cms-root" style="display:none">
-
-  <!-- Top Bar -->
-  <div id="cms-topbar">
-    <span class="cms-logo">✦ 管理后台</span>
-    <span id="dirty-badge" style="color:#888;font-size:13px">无修改</span>
-    <button onclick="saveAll()" class="cms-save-btn">💾 保存并部署</button>
-  </div>
-
-  <!-- Main Layout -->
-  <div id="cms-main">
-    <!-- Left Tabs -->
-    <div id="cms-sidebar">
-      <button class="cms-tab active" data-tab="home">🏠 首页</button>
-      <button class="cms-tab" data-tab="works">🖼 作品管理</button>
-      <button class="cms-tab" data-tab="about">👤 关于我</button>
-      <button class="cms-tab" data-tab="contact">📧 联系方式</button>
-      <button class="cms-tab" data-tab="files">📁 文件上传</button>
+  <!-- ====== Login ====== -->
+  <div class="admin-modal-overlay open" id="login-modal">
+    <div class="admin-modal">
+      <h2>✦ 管理后台</h2>
+      <p>所见即所得 · 点击任何文字直接编辑</p>
+      <div class="form-group"><label>管理密码</label><input type="password" id="admin-pwd" placeholder="请输入" /></div>
+      <div class="form-group"><label>GitHub Token</label><input type="password" id="admin-token" placeholder="ghp_..." /></div>
+      <button class="btn" onclick="adminLogin()">登录</button>
+      <div class="admin-error" id="admin-error">密码错误</div>
     </div>
+  </div>
 
-    <!-- Right Preview -->
-    <div id="cms-preview">
-      <!-- Home Tab -->
-      <div class="cms-panel active" id="panel-home">
-        <!-- Hero -->
-        <div id="preview-hero" class="preview-section">
-          <div class="preview-hero-inner">
-            <h1 class="editable" data-path="name" style="font-size:48px;margin:0 0 4px;font-weight:700;letter-spacing:0.04em" id="pv-name">—</h1>
-            <p class="editable" data-path="title" style="font-size:22px;margin:0 0 8px;color:#c084fc" id="pv-title">—</p>
-            <p class="editable" data-path="tagline" style="font-size:15px;margin:0;color:#888" id="pv-tagline">—</p>
+  <!-- ====== FAB Entry (before login) ====== -->
+  <button class="admin-entry-fab" onclick="document.getElementById('login-modal').classList.add('open')">✦</button>
+
+  <!-- ====== Admin Bar (after login) ====== -->
+  <div class="admin-bar" id="admin-bar">
+    <span class="admin-bar-logo">✦ 后台编辑</span>
+    <div class="admin-bar-tabs">
+      <button class="admin-bar-tab active" data-page="home">首页</button>
+      <button class="admin-bar-tab" data-page="works">作品集</button>
+      <button class="admin-bar-tab" data-page="about">关于我</button>
+      <button class="admin-bar-tab" data-page="files">📁 文件</button>
+    </div>
+    <div style="display:flex;align-items:center">
+      <span class="admin-bar-status" id="dirty-status"></span>
+      <button class="admin-bar-save" onclick="saveAll()">💾 保存部署</button>
+    </div>
+  </div>
+
+  <!-- ====== PAGE: Home ====== -->
+  <div class="admin-page active" id="page-home">
+    <!-- Hero -->
+    <section class="hero" style="height:auto;min-height:60vh;padding:80px 0">
+      <div class="hero-overlay"></div>
+      <div class="hero-content" style="position:relative;z-index:2">
+        <div class="hero-text">
+          <p class="hero-label" style="opacity:1" data-editable data-path="name" data-label="品牌标签">Portfolio · 跨境电商平面设计</p>
+          <h1 class="hero-title" style="overflow:visible">
+            <span class="hero-line"><span data-editable data-path="name" data-label="姓名">—</span></span>
+            <span class="hero-line" style="font-size:0.45em;font-weight:400;letter-spacing:.04em">
+              <span data-editable data-path="title" data-label="职位">—</span>
+            </span>
+          </h1>
+          <p class="hero-sub" style="opacity:1;transform:none">
+            <span data-editable data-path="tagline" data-label="一句话介绍">—</span>
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Stats -->
+    <section class="section stats-section">
+      <div class="container">
+        <div class="stats-grid" id="home-stats"></div>
+      </div>
+    </section>
+
+    <!-- Highlights -->
+    <section class="section highlights-section">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title"><span class="section-number">✦</span><span class="section-heading">核心价值</span></h2>
+          <p class="section-desc">不只是设计执行，更是视觉体系的架构师</p>
+        </div>
+        <div class="highlights-grid" id="home-highlights"></div>
+      </div>
+    </section>
+
+    <!-- Featured Works -->
+    <section class="section works-section">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title"><span class="section-number">01</span><span class="section-heading">精选作品</span></h2>
+        </div>
+        <div class="works-grid" id="home-featured"></div>
+      </div>
+    </section>
+
+    <!-- About Brief -->
+    <section class="section about-brief-section">
+      <div class="container">
+        <div class="about-brief" style="opacity:1;transform:none">
+          <div class="about-brief-text">
+            <h2 class="section-title"><span class="section-number">02</span><span class="section-heading">关于我</span></h2>
+            <p class="about-brief-p" data-editable data-path="about.bio1" data-label="简介一">—</p>
+            <p class="about-brief-p" data-editable data-path="about.bio2" data-label="简介二">—</p>
+          </div>
+          <div class="about-brief-visual">
+            <div class="about-avatar-frame"><div class="about-avatar-placeholder"><span class="avatar-icon">✦</span></div></div>
           </div>
         </div>
+      </div>
+    </section>
 
-        <!-- Stats -->
-        <div class="preview-section">
-          <h2 class="section-label">📊 首页数据条</h2>
-          <div id="preview-stats" class="stats-row"></div>
-          <button class="add-btn" onclick="addItem('stats')">+ 添加数据条</button>
-        </div>
-
-        <!-- Highlights -->
-        <div class="preview-section">
-          <h2 class="section-label">✦ 核心价值</h2>
-          <div id="preview-highlights" class="card-grid"></div>
-          <button class="add-btn" onclick="addItem('highlights')">+ 添加</button>
-        </div>
-
-        <!-- Featured Works -->
-        <div class="preview-section">
-          <h2 class="section-label">📌 首页精选作品</h2>
-          <div class="editable" data-path="featuredWorkIds" style="padding:8px 12px;background:#111;border-radius:6px;font-size:13px;color:#888;cursor:pointer" id="pv-featured">点击编辑精选作品 ID</div>
-        </div>
-
-        <!-- Footer -->
-        <div class="preview-section">
-          <h2 class="section-label">📄 页脚</h2>
-          <div class="editable" data-path="footer" style="padding:8px 12px;background:#111;border-radius:6px;font-size:13px;color:#888;cursor:pointer" id="pv-footer">—</div>
+    <!-- Contact -->
+    <section class="section contact-section" id="contact">
+      <div class="container">
+        <div class="contact-inner" style="opacity:1;transform:none">
+          <h2 class="section-title" style="justify-content:center"><span class="section-number">03</span><span class="section-heading">联系我</span></h2>
+          <p class="contact-text" style="opacity:1">有兴趣聊一聊？给我发邮件吧</p>
+          <a class="contact-email" style="opacity:1"><span class="email-text" data-editable data-path="email" data-label="邮箱">—</span><span class="email-arrow">→</span></a>
+          <div class="contact-socials" id="home-socials"></div>
         </div>
       </div>
+    </section>
 
-      <!-- Works Tab -->
-      <div class="cms-panel" id="panel-works">
-        <div id="preview-works"></div>
-        <button class="add-btn" onclick="addItem('works')" style="margin-top:16px">+ 新建作品</button>
-      </div>
+    <!-- Footer -->
+    <footer class="footer"><div class="container"><div class="footer-inner">
+      <span class="footer-copy" data-editable data-path="footer" data-label="页脚文字">—</span>
+      <a class="footer-top">↑ 回到顶部</a>
+    </div></div></footer>
+  </div>
 
-      <!-- About Tab -->
-      <div class="cms-panel" id="panel-about">
-        <div class="preview-section">
-          <h2 class="section-label">📝 个人简介</h2>
-          <div class="editable" data-path="about.bio1" style="padding:12px;background:#111;border-radius:6px;margin-bottom:8px;cursor:pointer;font-size:14px;line-height:1.7" id="pv-bio1">—</div>
-          <div class="editable" data-path="about.bio2" style="padding:12px;background:#111;border-radius:6px;margin-bottom:8px;cursor:pointer;font-size:14px;line-height:1.7" id="pv-bio2">—</div>
-          <div class="editable" data-path="about.bio3" style="padding:12px;background:#111;border-radius:6px;cursor:pointer;font-size:14px;line-height:1.7" id="pv-bio3">—</div>
+  <!-- ====== PAGE: Works ====== -->
+  <div class="admin-page" id="page-works">
+    <section class="section works-section" style="padding-top:60px">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title"><span class="section-number">✦</span><span class="section-heading">全部作品</span></h2>
         </div>
-        <div class="preview-section">
-          <h2 class="section-label">🛠 技能</h2>
-          <div id="preview-skills"></div>
-          <button class="add-btn" onclick="addItem('about.skills')">+ 添加技能</button>
-        </div>
-        <div class="preview-section">
-          <h2 class="section-label">💼 工作经历</h2>
-          <div id="preview-experience"></div>
-          <button class="add-btn" onclick="addItem('about.experience')">+ 添加</button>
-        </div>
-        <div class="preview-section">
-          <h2 class="section-label">🏆 成就</h2>
-          <div id="preview-achievements"></div>
-          <button class="add-btn" onclick="addItem('about.achievements')">+ 添加</button>
-        </div>
-        <div class="preview-section">
-          <h2 class="section-label">💬 评价</h2>
-          <div id="preview-testimonials"></div>
-          <button class="add-btn" onclick="addItem('about.testimonials')">+ 添加</button>
+        <div class="works-grid" id="works-grid"></div>
+        <div style="margin-top:24px;text-align:center">
+          <button class="ae-btn ae-btn-primary" onclick="addWork()">+ 新建作品</button>
         </div>
       </div>
+    </section>
+  </div>
 
-      <!-- Contact Tab -->
-      <div class="cms-panel" id="panel-contact">
-        <div class="preview-section">
-          <h2 class="section-label">📧 邮箱</h2>
-          <div class="editable" data-path="email" style="font-size:20px;padding:12px;background:#111;border-radius:6px;cursor:pointer;color:#c084fc" id="pv-email">—</div>
+  <!-- ====== PAGE: About ====== -->
+  <div class="admin-page" id="page-about">
+    <section class="section" style="padding-top:60px">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title"><span class="section-number">✦</span><span class="section-heading">关于我</span></h2>
         </div>
-        <div class="preview-section">
-          <h2 class="section-label">🔗 社交链接</h2>
-          <div id="preview-socials"></div>
-          <button class="add-btn" onclick="addItem('socials')">+ 添加</button>
-        </div>
-        <div class="preview-section">
-          <h2 class="section-label">🔑 管理密码</h2>
-          <div class="editable" data-path="adminPassword" style="padding:12px;background:#111;border-radius:6px;cursor:pointer;font-size:14px;color:#888" id="pv-password">—</div>
-        </div>
+        <p class="about-brief-p" data-editable data-path="about.bio1" data-label="简介一" style="margin-bottom:16px">—</p>
+        <p class="about-brief-p" data-editable data-path="about.bio2" data-label="简介二" style="margin-bottom:16px">—</p>
+        <p class="about-brief-p" data-editable data-path="about.bio3" data-label="简介三" style="margin-bottom:32px">—</p>
+
+        <h3 style="color:#c084fc;margin:32px 0 16px;font-size:18px">🛠 技能</h3>
+        <div id="about-skills"></div>
+
+        <h3 style="color:#c084fc;margin:32px 0 16px;font-size:18px">💼 工作经历</h3>
+        <div id="about-experience"></div>
+
+        <h3 style="color:#c084fc;margin:32px 0 16px;font-size:18px">🏆 成就</h3>
+        <div id="about-achievements"></div>
+
+        <h3 style="color:#c084fc;margin:32px 0 16px;font-size:18px">💬 评价</h3>
+        <div id="about-testimonials"></div>
       </div>
+    </section>
+  </div>
 
-      <!-- Files Tab -->
-      <div class="cms-panel" id="panel-files">
-        <div class="preview-section">
-          <h2 class="section-label">📤 上传文件</h2>
-          <input type="file" id="file-input" accept="image/*,video/*" multiple onchange="previewFiles()" style="color:#888;margin-bottom:8px" />
-          <div id="file-preview" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px"></div>
-          <button class="add-btn" onclick="uploadFiles()">📤 开始上传</button>
-        </div>
-        <div class="preview-section">
-          <h2 class="section-label">📂 已有文件（点击复制路径）</h2>
-          <button class="add-btn" onclick="loadFileList()" style="margin-bottom:12px">🔄 刷新列表</button>
-          <div id="existing-files" class="file-grid"></div>
-        </div>
+  <!-- ====== PAGE: Files ====== -->
+  <div class="admin-page" id="page-files">
+    <section class="section" style="padding-top:60px">
+      <div class="container">
+        <div class="section-header"><h2 class="section-title"><span class="section-number">📁</span><span class="section-heading">文件上传</span></h2></div>
+        <div class="ae-field"><label>选择图片或视频</label><input type="file" id="file-input" accept="image/*,video/*" multiple onchange="previewFiles()" style="color:#888" /></div>
+        <div id="file-preview" style="display:flex;flex-wrap:wrap;gap:8px;margin:12px 0"></div>
+        <button class="ae-btn ae-btn-primary" onclick="uploadFiles()">📤 上传</button>
+        <button class="ae-btn ae-btn-cancel" onclick="loadFileList()" style="margin-left:8px">🔄 刷新列表</button>
+        <div class="file-grid" id="existing-files" style="margin-top:24px"></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ====== Edit Modal ====== -->
+  <div class="ae-overlay" id="edit-modal">
+    <div class="ae-modal">
+      <h3 id="edit-title">编辑</h3>
+      <div id="edit-body"></div>
+      <div class="ae-actions">
+        <button class="ae-btn ae-btn-cancel" onclick="closeEdit()">取消</button>
+        <button class="ae-btn ae-btn-primary" onclick="saveEdit()">保存</button>
       </div>
     </div>
   </div>
-</div>
 
-<!-- ====== Edit Modal ====== -->
-<div class="admin-modal-overlay" id="edit-modal">
-  <div class="admin-modal" style="max-width:600px;max-height:80vh;overflow-y:auto">
-    <h3 id="edit-title">编辑</h3>
-    <div id="edit-body"></div>
-    <div style="margin-top:16px;display:flex;gap:8px">
-      <button class="btn" onclick="saveEdit()">保存</button>
-      <button class="btn" style="background:#333" onclick="closeEdit()">取消</button>
-    </div>
-  </div>
-</div>
+  <!-- ====== Toast ====== -->
+  <div class="admin-toast" id="admin-toast"></div>
 
-<!-- ====== Toast ====== -->
-<div class="admin-toast" id="admin-toast"></div>
+  <script>
+    const OWNER='2240854970-jpg', REPO='portfolio', DATA_PATH='src/data/site-data.js', IMG_DIR='public/images/', BRANCH='main';
+    let siteData=null, dataSha='', gitToken='', dirty=false, editTarget=null, currentPage='home';
 
-<style>
-  /* CMS Layout */
-  #cms-topbar { position:sticky; top:0; z-index:200; display:flex; align-items:center; justify-content:space-between; padding:12px 20px; background:#0a0a0f; border-bottom:1px solid #1a1a2a; }
-  .cms-logo { font-size:16px; font-weight:700; color:#c084fc; }
-  .cms-save-btn { padding:8px 20px; border:none; border-radius:8px; background:#22c55e; color:#000; font-weight:700; font-size:14px; cursor:pointer; }
-  .cms-save-btn:hover { opacity:.85; }
-  #cms-main { display:flex; min-height:calc(100vh - 53px); }
-  #cms-sidebar { width:180px; background:#0a0a0f; border-right:1px solid #1a1a2a; padding:12px 0; flex-shrink:0; }
-  .cms-tab { display:block; width:100%; padding:10px 16px; border:none; background:transparent; color:#888; text-align:left; font-size:14px; cursor:pointer; transition:all .2s; }
-  .cms-tab:hover { color:#ddd; background:#111; }
-  .cms-tab.active { color:#c084fc; background:#14141f; border-left:2px solid #c084fc; }
-  #cms-preview { flex:1; padding:24px; overflow-y:auto; max-height:calc(100vh - 53px); }
-  .cms-panel { display:none; }
-  .cms-panel.active { display:block; }
-  .preview-section { margin-bottom:32px; }
-  .section-label { font-size:13px; color:#666; margin:0 0 12px; font-weight:400; text-transform:uppercase; letter-spacing:.08em; }
-  .preview-hero-inner { padding:48px 24px; background:linear-gradient(135deg,#0d0d1a,#1a0d2a); border-radius:12px; text-align:center; }
-  .stats-row { display:flex; flex-wrap:wrap; gap:12px; }
-  .stat-card { flex:1; min-width:120px; padding:16px 12px; background:#111; border-radius:10px; border:1px solid #1a1a2a; text-align:center; position:relative; }
-  .stat-card .val { font-size:28px; font-weight:700; color:#c084fc; }
-  .stat-card .lbl { font-size:12px; color:#888; margin-top:4px; }
-  .stat-card .icon { font-size:18px; margin-bottom:4px; }
-  .stat-card .del { position:absolute; top:4px; right:8px; font-size:14px; color:#ef4444; cursor:pointer; opacity:.5; }
-  .stat-card .del:hover { opacity:1; }
-  .card-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:12px; }
-  .hl-card { padding:16px; background:#111; border-radius:10px; border:1px solid #1a1a2a; position:relative; }
-  .hl-card .icon { font-size:20px; margin-bottom:8px; }
-  .hl-card .title { font-weight:600; font-size:14px; color:#ddd; margin-bottom:6px; }
-  .hl-card .desc { font-size:12px; color:#888; line-height:1.5; }
-  .hl-card .del { position:absolute; top:6px; right:10px; color:#ef4444; cursor:pointer; opacity:.5; font-size:14px; }
-  .hl-card .del:hover { opacity:1; }
-  .work-card { display:flex; gap:12px; padding:12px; background:#111; border-radius:10px; border:1px solid #1a1a2a; margin-bottom:8px; align-items:center; }
-  .work-card img { width:60px; height:60px; object-fit:cover; border-radius:6px; }
-  .work-card .info { flex:1; }
-  .work-card .wtitle { font-weight:600; font-size:14px; color:#ddd; }
-  .work-card .wmeta { font-size:12px; color:#888; }
-  .work-card .wactions { display:flex; gap:6px; }
-  .work-card .wactions button { padding:4px 10px; border:1px solid #333; border-radius:4px; background:transparent; color:#888; cursor:pointer; font-size:11px; }
-  .work-card .wactions button:hover { border-color:#c084fc; color:#c084fc; }
-  .work-card .wactions .del-btn:hover { border-color:#ef4444; color:#ef4444; }
-  .skill-bar { margin-bottom:12px; }
-  .skill-bar .sname { font-size:13px; color:#ddd; margin-bottom:4px; display:flex; justify-content:space-between; }
-  .skill-bar .sbar { height:6px; background:#1a1a2a; border-radius:3px; overflow:hidden; }
-  .skill-bar .sfill { height:100%; background:#c084fc; border-radius:3px; }
-  .exp-card, .ach-card, .test-card { padding:12px; background:#111; border-radius:8px; border:1px solid #1a1a2a; margin-bottom:8px; position:relative; }
-  .exp-card .del, .ach-card .del, .test-card .del { position:absolute; top:6px; right:10px; color:#ef4444; cursor:pointer; opacity:.5; font-size:14px; }
-  .exp-card .del:hover, .ach-card .del:hover, .test-card .del:hover { opacity:1; }
-  .social-card { display:flex; align-items:center; gap:12px; padding:10px 12px; background:#111; border-radius:8px; border:1px solid #1a1a2a; margin-bottom:6px; }
-  .social-card .sicon { font-size:18px; }
-  .social-card .sname { font-size:14px; color:#ddd; flex:1; }
-  .social-card .surl { font-size:12px; color:#888; }
-  .social-card .del { color:#ef4444; cursor:pointer; opacity:.5; }
-  .social-card .del:hover { opacity:1; }
-  .add-btn { padding:6px 14px; border:1px dashed #333; border-radius:6px; background:transparent; color:#888; cursor:pointer; font-size:12px; margin-top:8px; }
-  .add-btn:hover { border-color:#c084fc; color:#c084fc; }
-  .editable { cursor:pointer; transition:all .15s; position:relative; }
-  .editable:hover { outline:1px dashed #c084fc44; border-radius:4px; }
-  .editable::after { content:'✎'; position:absolute; right:-20px; top:50%; transform:translateY(-50%); font-size:11px; color:#c084fc88; opacity:0; transition:opacity .15s; }
-  .editable:hover::after { opacity:1; }
-  .file-grid { display:flex; flex-wrap:wrap; gap:8px; }
-  .file-item { text-align:center; }
-  .file-item img, .file-item video { width:100px; height:100px; object-fit:cover; border-radius:6px; border:1px solid #333; }
-  .file-item .fn { font-size:11px; color:#888; margin-top:4px; max-width:100px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; cursor:pointer; }
-  .file-item .fn:hover { color:#c084fc; text-decoration:underline; }
-  .file-preview-item { position:relative; }
-  .file-preview-item img, .file-preview-item video { width:80px; height:80px; object-fit:cover; border-radius:4px; border:1px solid #333; }
-  .file-preview-item .name { font-size:10px; color:#888; max-width:80px; overflow:hidden; text-overflow:ellipsis; }
-  .edit-field { margin-bottom:14px; }
-  .edit-field label { display:block; font-size:12px; color:#888; margin-bottom:4px; }
-  .edit-field input, .edit-field textarea, .edit-field select {
-    width:100%; padding:8px 12px; border-radius:6px; border:1px solid #333; background:#1a1a1a; color:#ddd; font-size:13px; box-sizing:border-box;
-  }
-  .edit-field textarea { resize:vertical; }
-  /* Make object editor modal click-outside to close */
-  #edit-modal { display:none; }
-  #edit-modal.open { display:flex; }
-</style>
+    // ── GitHub API ──
+    async function ghGet(path){
+      const r=await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`,{
+        headers:{'Authorization':`Bearer ${gitToken}`,'Accept':'application/vnd.github+json'}
+      }); return r.ok?await r.json():null;
+    }
+    async function ghPut(path,content,msg,sha){
+      const b64=btoa(unescape(encodeURIComponent(content)));
+      const body={message:msg,content:b64,branch:BRANCH}; if(sha) body.sha=sha;
+      const r=await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`,{
+        method:'PUT',headers:{'Authorization':`Bearer ${gitToken}`,'Accept':'application/vnd.github+json','Content-Type':'application/json'},
+        body:JSON.stringify(body)
+      }); return r.ok?await r.json():null;
+    }
+    async function ghListDir(path){
+      const r=await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`,{
+        headers:{'Authorization':`Bearer ${gitToken}`,'Accept':'application/vnd.github+json'}
+      }); return r.ok?await r.json():[];
+    }
+    function d64(b64){try{return decodeURIComponent(escape(atob(b64)));}catch{return atob(b64);}}
 
-<script>
-const OWNER='2240854970-jpg', REPO='portfolio', DATA_PATH='src/data/site-data.js', IMG_DIR='public/images/', BRANCH='main';
-let siteData=null, dataSha='', gitToken='', dirty=false, editTarget=null, editCb=null;
+    // ── Parse ──
+    function parseData(raw){
+      const m=raw.match(/export const siteData\s*=\s*({[\s\S]*?})\n\s*(?:export|$)/);
+      if(!m) return null;
+      try{return new Function('return '+m[1])();}catch(e){return null;}
+    }
+    function getByPath(obj,p){return p.split('.').reduce((o,k)=>o?.[k],obj);}
+    function setByPath(obj,p,val){const k=p.split('.');let o=obj;for(let i=0;i<k.length-1;i++){if(!o[k[i]]) o[k[i]]={};o=o[k[i]];}o[k[k.length-1]]=val;}
 
-// ── GitHub API ──
-async function ghGet(path){
-  const r=await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`,{
-    headers:{'Authorization':`Bearer ${gitToken}`,'Accept':'application/vnd.github+json'}
-  });
-  return r.ok?await r.json():null;
-}
-async function ghPut(path,content,msg,sha){
-  const b64=btoa(unescape(encodeURIComponent(content)));
-  const body={message:msg,content:b64,branch:BRANCH};
-  if(sha) body.sha=sha;
-  const r=await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`,{
-    method:'PUT',
-    headers:{'Authorization':`Bearer ${gitToken}`,'Accept':'application/vnd.github+json','Content-Type':'application/json'},
-    body:JSON.stringify(body)
-  });
-  return r.ok?await r.json():null;
-}
-async function ghListDir(path){
-  const r=await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`,{
-    headers:{'Authorization':`Bearer ${gitToken}`,'Accept':'application/vnd.github+json'}
-  });
-  return r.ok?await r.json():[];
-}
-function d64(b64){try{return decodeURIComponent(escape(atob(b64)));}catch{return atob(b64);}}
+    function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
-// ── Parse siteData ──
-function parseData(raw){
-  const m=raw.match(/export const siteData\s*=\s*({[\s\S]*?})\n\s*(?:export|$)/);
-  if(!m) return null;
-  try{return new Function('return '+m[1])();}catch(e){return null;}
-}
+    // ── Login ──
+    async function adminLogin(){
+      gitToken=document.getElementById('admin-token').value;
+      const pwd=document.getElementById('admin-pwd').value;
+      const resp=await ghGet(DATA_PATH);
+      if(!resp){toast('无法连接 GitHub','error');return;}
+      const raw=d64(resp.content); dataSha=resp.sha;
+      const sd=parseData(raw);
+      if(!sd||sd.adminPassword!==pwd){document.getElementById('admin-error').style.display='block';return;}
+      siteData=sd;
+      document.getElementById('login-modal').classList.remove('open');
+      document.body.classList.add('logged-in');
+      renderAll();
+    }
 
-// ── Get nested value by path like "about.bio1" ──
-function getByPath(obj,path){
-  return path.split('.').reduce((o,k)=>o?.[k],obj);
-}
-function setByPath(obj,path,val){
-  const keys=path.split('.');
-  let o=obj;
-  for(let i=0;i<keys.length-1;i++){
-    if(!o[keys[i]]) o[keys[i]]={};
-    o=o[keys[i]];
-  }
-  o[keys[keys.length-1]]=val;
-}
+    // ── Render Everything ──
+    function renderAll(){
+      const d=siteData;
+      // Fill all [data-editable] spans
+      document.querySelectorAll('[data-editable]').forEach(el=>{
+        const path=el.dataset.path;
+        const val=getByPath(d,path);
+        if(val!==undefined && val!==null) el.textContent=typeof val==='string'?val:String(val);
+      });
+      // Render dynamic lists
+      renderHomeStats();
+      renderHomeHighlights();
+      renderHomeFeatured();
+      renderHomeSocials();
+      renderWorksGrid();
+      renderAboutSkills();
+      renderAboutExperience();
+      renderAboutAchievements();
+      renderAboutTestimonials();
+    }
 
-// ── Login ──
-async function adminLogin(){
-  gitToken=document.getElementById('admin-token').value;
-  const pwd=document.getElementById('admin-pwd').value;
-  const resp=await ghGet(DATA_PATH);
-  if(!resp){toast('无法连接 GitHub','error');return;}
-  const raw=d64(resp.content); dataSha=resp.sha;
-  const sd=parseData(raw);
-  if(!sd||sd.adminPassword!==pwd){document.getElementById('admin-error').style.display='block';return;}
-  siteData=sd;
-  document.getElementById('login-modal').style.display='none';
-  document.getElementById('cms-root').style.display='block';
-  renderAll();
-}
+    // ── Home Stats ──
+    function renderHomeStats(){
+      const arr=siteData.stats||[];
+      document.getElementById('home-stats').innerHTML=arr.map((s,i)=>`
+        <div class="stat-item" style="opacity:1;transform:none">
+          <span class="stat-icon">${esc(s.icon)}</span>
+          <span class="stat-value" data-editable data-path="stats.${i}.value" data-label="数据条值">${esc(s.value)}</span>
+          <span class="stat-label" data-editable data-path="stats.${i}.label" data-label="数据条描述">${esc(s.label)}</span>
+          <button class="ae-btn-sm danger" onclick="delArr('stats',${i})" style="position:absolute;top:4px;right:8px" title="删除">✕</button>
+        </div>`).join('')+`<button class="ae-btn-sm" onclick="addItem('stats')" style="margin-left:8px">+ 添加</button>`;
+    }
 
-// ── Render All ──
-function renderAll(){
-  const d=siteData;
-  // Home
-  document.getElementById('pv-name').textContent=d.name||'—';
-  document.getElementById('pv-title').textContent=d.title||'—';
-  document.getElementById('pv-tagline').textContent=d.tagline||'—';
-  document.getElementById('pv-featured').textContent=(d.featuredWorkIds||[]).join(', ')||'点击编辑';
-  document.getElementById('pv-footer').textContent=d.footer||'—';
-  renderStats();
-  renderHighlights();
-  renderWorks();
-  // About
-  document.getElementById('pv-bio1').textContent=(d.about||{}).bio1||'—';
-  document.getElementById('pv-bio2').textContent=(d.about||{}).bio2||'—';
-  document.getElementById('pv-bio3').textContent=(d.about||{}).bio3||'—';
-  renderSkills();
-  renderExperience();
-  renderAchievements();
-  renderTestimonials();
-  // Contact
-  document.getElementById('pv-email').textContent=d.email||'—';
-  document.getElementById('pv-password').textContent=d.adminPassword||'—';
-  renderSocials();
-}
+    // ── Home Highlights ──
+    function renderHomeHighlights(){
+      const arr=siteData.highlights||[];
+      document.getElementById('home-highlights').innerHTML=arr.map((h,i)=>`
+        <div class="highlight-card">
+          <span class="highlight-icon">${esc(h.icon)}</span>
+          <h3 class="highlight-title" data-editable data-path="highlights.${i}.label" data-label="亮点标题">${esc(h.label)}</h3>
+          <p class="highlight-desc" data-editable data-path="highlights.${i}.desc" data-label="亮点描述">${esc(h.desc)}</p>
+          <div style="margin-top:8px"><button class="ae-btn-sm danger" onclick="delArr('highlights',${i})">✕ 删除</button></div>
+        </div>`).join('')+`<div class="highlight-card" style="display:flex;align-items:center;justify-content:center;border:1px dashed #333"><button class="ae-btn-sm" onclick="addItem('highlights')">+ 添加</button></div>`;
+    }
 
-function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+    // ── Home Featured ──
+    function renderHomeFeatured(){
+      const ids=siteData.featuredWorkIds||[];
+      const works=siteData.works||[];
+      const featured=ids.map(id=>works.find(w=>w.id===id)).filter(Boolean);
+      document.getElementById('home-featured').innerHTML=featured.map(w=>{
+        const img=w.images&&w.images[0]?w.images[0]:w.thumbnail;
+        return `<div class="work-card-item" style="border:1px solid rgba(255,255,255,.06);border-radius:12px;overflow:hidden;background:#0f0f0f">
+          ${img?`<img src="${esc(img)}" style="width:100%;height:200px;object-fit:cover" onerror="this.src=''" />`:''}
+          <div style="padding:12px"><h4 style="font-size:14px;color:#ddd">${esc(w.title)}</h4><p style="font-size:12px;color:#888">${esc(w.category)}</p></div>
+        </div>`;
+      }).join('')||'<p style="color:#888;font-size:13px">暂无精选作品。在上方编辑栏处点击编辑精选作品 ID。</p>';
+      // Also make featuredWorkIds editable
+      const el=document.querySelector('[data-path="featuredWorkIds"]');
+      if(el) el.textContent='精选 ID: '+(ids.join(', ')||'无');
+    }
+    // Expose featuredWorkIds editing via a button
+    (function(){
+      const wrap=document.getElementById('home-featured').parentElement;
+      if(!document.getElementById('edit-featured-btn')){
+        const btn=document.createElement('button');
+        btn.id='edit-featured-btn'; btn.className='ae-btn-sm'; btn.textContent='✎ 编辑精选作品ID';
+        btn.style.cssText='margin-bottom:12px';
+        btn.onclick=()=>openEdit('featuredWorkIds','精选作品ID',(siteData.featuredWorkIds||[]).join(', '),true,()=>{
+          siteData.featuredWorkIds=document.getElementById('edit-val').value.split(',').map(s=>s.trim()).filter(Boolean);
+          markDirty(); renderHomeFeatured();
+        });
+        wrap.insertBefore(btn,document.getElementById('home-featured'));
+      }
+    })();
 
-// ── Stats ──
-function renderStats(){
-  const arr=siteData.stats||[];
-  document.getElementById('preview-stats').innerHTML=arr.map((s,i)=>`
-    <div class="stat-card">
-      <span class="del" onclick="delArr('stats',${i})">✕</span>
-      <div class="icon">${esc(s.icon)}</div>
-      <div class="val editable" onclick="editArrItem('stats',${i},['value','label','icon'])">${esc(s.value)}</div>
-      <div class="lbl editable" onclick="editArrItem('stats',${i},['value','label','icon'])">${esc(s.label)}</div>
-    </div>`).join('');
-}
-// ── Highlights ──
-function renderHighlights(){
-  const arr=siteData.highlights||[];
-  document.getElementById('preview-highlights').innerHTML=arr.map((h,i)=>`
-    <div class="hl-card">
-      <span class="del" onclick="delArr('highlights',${i})">✕</span>
-      <div class="icon editable" onclick="editArrItem('highlights',${i},['icon','label','desc'])">${esc(h.icon)}</div>
-      <div class="title editable" onclick="editArrItem('highlights',${i},['icon','label','desc'])">${esc(h.label)}</div>
-      <div class="desc editable" onclick="editArrItem('highlights',${i},['icon','label','desc'])">${esc(h.desc)}</div>
-    </div>`).join('');
-}
+    // ── Home Socials ──
+    function renderHomeSocials(){
+      document.getElementById('home-socials').innerHTML=(siteData.socials||[]).map((s,i)=>`
+        <a class="social-link" style="cursor:pointer">${esc(s.name)}</a>
+      `).join('');
+    }
 
-// ── Works ──
-function renderWorks(){
-  const arr=siteData.works||[];
-  document.getElementById('preview-works').innerHTML=arr.map((w,i)=>`
-    <div class="work-card">
-      ${w.thumbnail?`<img src="${esc(w.thumbnail)}" onerror="this.style.display='none'" />`:`<div style="width:60px;height:60px;background:#1a1a2a;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#444">🖼</div>`}
-      <div class="info">
-        <div class="wtitle">${esc(w.title)} <span style="font-size:11px;color:#${w.type==='video'?'f59e0b':'888'}">[${esc(w.type||'image')}]</span></div>
-        <div class="wmeta">${esc(w.category||'')} · ${esc(w.date||'')} | 图片:${(w.images||[]).length}张</div>
-      </div>
-      <div class="wactions">
-        <button onclick="editWork(${i})">✎ 编辑</button>
-        <button class="del-btn" onclick="delArr('works',${i})">✕</button>
-      </div>
-    </div>`).join('');
-}
+    // ── Works Grid ──
+    function renderWorksGrid(){
+      const arr=siteData.works||[];
+      document.getElementById('works-grid').innerHTML=arr.map((w,i)=>{
+        const img=w.images&&w.images[0]?w.images[0]:w.thumbnail;
+        return `<div class="work-card-item" style="border:1px solid rgba(255,255,255,.06);border-radius:12px;overflow:hidden;background:#0f0f0f;position:relative">
+          ${img?`<img src="${esc(img)}" style="width:100%;height:180px;object-fit:cover" onerror="this.src=''" />`:`<div style="width:100%;height:120px;background:#1a1a2a;display:flex;align-items:center;justify-content:center;color:#444;font-size:24px">🖼</div>`}
+          <div style="padding:12px">
+            <h4 style="font-size:15px;color:#ddd;margin-bottom:4px">${esc(w.title)}</h4>
+            <p style="font-size:12px;color:#888;margin-bottom:2px">${esc(w.category)} · ${esc(w.date)}</p>
+            <p style="font-size:11px;color:#666">${esc(w.type||'image')} | ${(w.images||[]).length}张图</p>
+          </div>
+          <div style="position:absolute;top:8px;right:8px;display:flex;gap:4px">
+            <button class="ae-btn-sm" onclick="editWork(${i})" style="background:rgba(0,0,0,.6)">✎</button>
+            <button class="ae-btn-sm danger" onclick="delArr('works',${i})" style="background:rgba(0,0,0,.6)">✕</button>
+          </div>
+        </div>`;
+      }).join('');
+    }
 
-// ── Skills ──
-function renderSkills(){
-  const arr=(siteData.about||{}).skills||[];
-  document.getElementById('preview-skills').innerHTML=arr.map((s,i)=>`
-    <div class="skill-bar">
-      <div class="sname"><span>${esc(s.name)}</span><span>${Math.round((s.level||0)*100)}%</span></div>
-      <div class="sbar"><div class="sfill" style="width:${Math.round((s.level||0)*100)}%"></div></div>
-      <div style="margin-top:2px"><button style="background:none;border:none;color:#888;cursor:pointer;font-size:10px" onclick="editArrItem('about.skills',${i},['name','level'])">✎ 编辑</button> <button style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:10px" onclick="delArr('about.skills',${i})">✕</button></div>
-    </div>`).join('');
-}
+    // ── About Skills ──
+    function renderAboutSkills(){
+      const arr=(siteData.about||{}).skills||[];
+      document.getElementById('about-skills').innerHTML=arr.map((s,i)=>`
+        <div style="margin-bottom:12px;padding:8px 12px;background:#0f0f0f;border-radius:8px;border:1px solid rgba(255,255,255,.04)">
+          <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px">
+            <span>${esc(s.name)}</span><span style="color:#c084fc">${Math.round((s.level||0)*100)}%</span>
+          </div>
+          <div style="height:4px;background:#1a1a2a;border-radius:2px"><div style="height:100%;background:#c084fc;border-radius:2px;width:${Math.round((s.level||0)*100)}%"></div></div>
+          <div style="margin-top:4px"><button class="ae-btn-sm" onclick="editArrItem('about.skills',${i},['name','level'])">✎</button> <button class="ae-btn-sm danger" onclick="delArr('about.skills',${i})">✕</button></div>
+        </div>`).join('')+`<button class="ae-btn-sm" onclick="addItem('about.skills')">+ 添加技能</button>`;
+    }
 
-// ── Experience ──
-function renderExperience(){
-  const arr=(siteData.about||{}).experience||[];
-  document.getElementById('preview-experience').innerHTML=arr.map((e,i)=>`
-    <div class="exp-card">
-      <span class="del" onclick="delArr('about.experience',${i})">✕</span>
-      <div style="font-size:12px;color:#c084fc;margin-bottom:4px">${esc(e.period)}</div>
-      <div style="font-weight:600;font-size:14px;color:#ddd">${esc(e.role)} · ${esc(e.company)}</div>
-      <div style="font-size:12px;color:#888;margin-top:4px;line-height:1.5">${esc(e.desc||'')}</div>
-      <button style="background:none;border:none;color:#888;cursor:pointer;font-size:10px;margin-top:4px" onclick="editArrItem('about.experience',${i},['period','company','role','desc'])">✎ 编辑</button>
-    </div>`).join('');
-}
+    // ── About Experience ──
+    function renderAboutExperience(){
+      const arr=(siteData.about||{}).experience||[];
+      document.getElementById('about-experience').innerHTML=arr.map((e,i)=>`
+        <div style="padding:16px;background:#0f0f0f;border-radius:10px;border:1px solid rgba(255,255,255,.04);margin-bottom:12px;position:relative">
+          <span style="font-size:12px;color:#c084fc">${esc(e.period)}</span>
+          <h4 style="font-size:15px;color:#ddd;margin:4px 0">${esc(e.role)} · ${esc(e.company)}</h4>
+          <p style="font-size:13px;color:#888;line-height:1.6">${esc(e.desc||'')}</p>
+          <div style="margin-top:8px"><button class="ae-btn-sm" onclick="editArrItem('about.experience',${i},['period','company','role','desc'])">✎</button> <button class="ae-btn-sm danger" onclick="delArr('about.experience',${i})">✕</button></div>
+        </div>`).join('')+`<button class="ae-btn-sm" onclick="addItem('about.experience')">+ 添加经历</button>`;
+    }
 
-// ── Achievements ──
-function renderAchievements(){
-  const arr=(siteData.about||{}).achievements||[];
-  document.getElementById('preview-achievements').innerHTML=arr.map((a,i)=>`
-    <div class="ach-card">
-      <span class="del" onclick="delArr('about.achievements',${i})">✕</span>
-      <div style="font-size:18px;margin-bottom:4px">${esc(a.icon)}</div>
-      <div style="font-weight:600;font-size:14px;color:#ddd">${esc(a.title)} <span style="font-size:11px;color:#888">${esc(a.year)}</span></div>
-      <div style="font-size:12px;color:#888;margin-top:4px;line-height:1.5">${esc(a.desc||'')}</div>
-      <button style="background:none;border:none;color:#888;cursor:pointer;font-size:10px;margin-top:4px" onclick="editArrItem('about.achievements',${i},['icon','title','year','desc'])">✎ 编辑</button>
-    </div>`).join('');
-}
+    // ── About Achievements ──
+    function renderAboutAchievements(){
+      const arr=(siteData.about||{}).achievements||[];
+      document.getElementById('about-achievements').innerHTML=arr.map((a,i)=>`
+        <div style="padding:16px;background:#0f0f0f;border-radius:10px;border:1px solid rgba(255,255,255,.04);margin-bottom:12px;position:relative">
+          <span style="font-size:20px">${esc(a.icon)}</span>
+          <h4 style="font-size:15px;color:#ddd;margin:6px 0 4px">${esc(a.title)} <span style="font-size:11px;color:#888">${esc(a.year)}</span></h4>
+          <p style="font-size:13px;color:#888;line-height:1.6">${esc(a.desc||'')}</p>
+          <div style="margin-top:8px"><button class="ae-btn-sm" onclick="editArrItem('about.achievements',${i},['icon','title','year','desc'])">✎</button> <button class="ae-btn-sm danger" onclick="delArr('about.achievements',${i})">✕</button></div>
+        </div>`).join('')+`<button class="ae-btn-sm" onclick="addItem('about.achievements')">+ 添加成就</button>`;
+    }
 
-// ── Testimonials ──
-function renderTestimonials(){
-  const arr=(siteData.about||{}).testimonials||[];
-  document.getElementById('preview-testimonials').innerHTML=arr.map((t,i)=>`
-    <div class="test-card">
-      <span class="del" onclick="delArr('about.testimonials',${i})">✕</span>
-      <div style="font-size:13px;color:#ddd;line-height:1.6;font-style:italic">"${esc(t.quote||'')}"</div>
-      <div style="font-size:12px;color:#888;margin-top:6px">— ${esc(t.author)} ${t.role?'· '+esc(t.role):''}</div>
-      <button style="background:none;border:none;color:#888;cursor:pointer;font-size:10px;margin-top:4px" onclick="editArrItem('about.testimonials',${i},['quote','author','role'])">✎ 编辑</button>
-    </div>`).join('');
-}
+    // ── About Testimonials ──
+    function renderAboutTestimonials(){
+      const arr=(siteData.about||{}).testimonials||[];
+      document.getElementById('about-testimonials').innerHTML=arr.map((t,i)=>`
+        <div style="padding:16px;background:#0f0f0f;border-radius:10px;border:1px solid rgba(255,255,255,.04);margin-bottom:12px;position:relative">
+          <p style="font-size:14px;color:#ddd;line-height:1.7;font-style:italic">"${esc(t.quote||'')}"</p>
+          <p style="font-size:12px;color:#888;margin-top:8px">— ${esc(t.author)} ${t.role?esc(t.role):''}</p>
+          <div style="margin-top:8px"><button class="ae-btn-sm" onclick="editArrItem('about.testimonials',${i},['quote','author','role'])">✎</button> <button class="ae-btn-sm danger" onclick="delArr('about.testimonials',${i})">✕</button></div>
+        </div>`).join('')+`<button class="ae-btn-sm" onclick="addItem('about.testimonials')">+ 添加评价</button>`;
+    }
 
-// ── Socials ──
-function renderSocials(){
-  const arr=siteData.socials||[];
-  document.getElementById('preview-socials').innerHTML=arr.map((s,i)=>`
-    <div class="social-card">
-      <span class="sicon">${esc(s.icon)}</span>
-      <span class="sname">${esc(s.name)}</span>
-      <span class="surl">${esc(s.url)}</span>
-      <span class="del" onclick="delArr('socials',${i})">✕</span>
-      <button style="background:none;border:none;color:#888;cursor:pointer;font-size:10px" onclick="editArrItem('socials',${i},['name','url','icon'])">✎</button>
-    </div>`).join('');
-}
-
-// ── Edit Simple Field ──
-function openEditField(path, label, currentValue, isLong){
-  editTarget={type:'field',path:path};
-  document.getElementById('edit-title').textContent='编辑 — '+label;
-  document.getElementById('edit-body').innerHTML=`
-    <div class="edit-field"><label>${label}</label>
-    ${isLong?'<textarea id="edit-val" rows="6">'+esc(String(currentValue||''))+'</textarea>':'<input id="edit-val" value="'+esc(String(currentValue||''))+'" />'}
-    </div>`;
-  document.getElementById('edit-modal').classList.add('open');
-}
-
-// ── Edit Array Item ──
-function editArrItem(arrPath, index, keys){
-  const arr=getByPath(siteData,arrPath);
-  if(!arr||!arr[index]) return;
-  editTarget={type:'arrItem',path:arrPath,index:index,keys:keys};
-  document.getElementById('edit-title').textContent='编辑项目 #'+(index+1);
-  let html='';
-  keys.forEach(k=>{
-    let val=arr[index][k]!==undefined?arr[index][k]:'';
-    html+=`<div class="edit-field"><label>${k}</label><input id="ev-${k}" value="${esc(String(val))}" /></div>`;
-  });
-  document.getElementById('edit-body').innerHTML=html;
-  document.getElementById('edit-modal').classList.add('open');
-}
-
-// ── Edit Work (complex) ──
-function editWork(index){
-  const w=siteData.works[index];
-  if(!w) return;
-  editTarget={type:'work',index:index};
-  document.getElementById('edit-title').textContent='编辑作品: '+w.title;
-  let html='';
-  [
-    ['id','ID'],['title','标题'],['category','分类'],['type','类型(image/video)'],
-    ['thumbnail','缩略图路径'],['bgGrad','背景渐变'],['videoUrl','视频链接'],
-    ['brief','简介'],['role','角色'],['date','日期'],
-    ['achievement','成果'],['designIntro','设计思路'],['designResult','设计成果']
-  ].forEach(([k,label])=>{
-    html+=`<div class="edit-field"><label>${label}</label><input id="ew-${k}" value="${esc(w[k]||'')}" /></div>`;
-  });
-  html+=`<div class="edit-field"><label>工具（逗号分隔）</label><input id="ew-tools" value="${esc((w.tools||[]).join(', '))}" /></div>`;
-  html+=`<div class="edit-field"><label>图片路径（逗号分隔）</label><textarea id="ew-images" rows="2">${esc((w.images||[]).join(', '))}</textarea></div>`;
-  html+=`<div class="edit-field"><label>ShowCase 数量: ${(w.showCase||[]).length}（暂不支持直接编辑，需手动改 site-data.js）</label></div>`;
-  document.getElementById('edit-body').innerHTML=html;
-  document.getElementById('edit-modal').classList.add('open');
-}
-
-function saveEdit(){
-  if(!editTarget) return;
-  if(editTarget.type==='field'){
-    const val=document.getElementById('edit-val').value;
-    setByPath(siteData,editTarget.path,val);
-    markDirty();
-    renderAll();
-    curTab();
-  }else if(editTarget.type==='arrItem'){
-    const arr=getByPath(siteData,editTarget.path);
-    editTarget.keys.forEach(k=>{
-      const v=document.getElementById('ev-'+k).value;
-      // Try number conversion for level field
-      if(k==='level') arr[editTarget.index][k]=parseFloat(v)||0;
-      else arr[editTarget.index][k]=v;
+    // ── Edit System ──
+    document.addEventListener('click',e=>{
+      const el=e.target.closest('[data-editable]');
+      if(!el||!el.dataset.path) return;
+      const path=el.dataset.path;
+      const val=getByPath(siteData,path);
+      const label=el.dataset.label||path;
+      const isLong=typeof val==='string'&&val.length>60;
+      openEdit(path,label,val!==undefined?String(val):'',isLong,null);
     });
-    markDirty();
-    renderAll();
-    curTab();
-  }else if(editTarget.type==='work'){
-    const w=siteData.works[editTarget.index];
-    ['id','title','category','type','thumbnail','bgGrad','videoUrl','brief','role','date','achievement','designIntro','designResult'].forEach(k=>{
-      w[k]=document.getElementById('ew-'+k).value;
+    // Also re-bind after dynamic render
+    function rebindEditable(){
+      // Already handled by event delegation on document
+    }
+
+    function openEdit(path,label,currentValue,isLong,customSave){
+      editTarget={path:path,label:label,customSave:customSave};
+      document.getElementById('edit-title').textContent='编辑 — '+label;
+      document.getElementById('edit-body').innerHTML=`
+        <div class="ae-field"><label>${label}</label>
+        ${isLong?`<textarea id="edit-val" rows="6">${esc(currentValue)}</textarea>`:`<input id="edit-val" value="${esc(currentValue)}" />`}
+        </div>`;
+      document.getElementById('edit-modal').classList.add('open');
+    }
+    function saveEdit(){
+      if(!editTarget) return;
+      const val=document.getElementById('edit-val').value;
+      if(editTarget.customSave){
+        editTarget.customSave(val);
+      }else{
+        const path=editTarget.path;
+        // Try number conversion for level fields
+        if(path.endsWith('.level')) setByPath(siteData,path,parseFloat(val)||0);
+        else setByPath(siteData,path,val);
+        markDirty();
+        renderAll();
+      }
+      closeEdit();
+    }
+    function closeEdit(){
+      document.getElementById('edit-modal').classList.remove('open');
+      editTarget=null;
+    }
+
+    // ── Array CRUD ──
+    function delArr(path,index){
+      const arr=getByPath(siteData,path);
+      if(!arr) return;
+      const name=arr[index]?.title||arr[index]?.label||arr[index]?.name||('项#'+(index+1));
+      if(!confirm('删除「'+name+'」？')) return;
+      arr.splice(index,1);
+      markDirty(); renderAll();
+    }
+    function addItem(path){
+      const defaults={
+        stats:{value:'新数据',label:'描述',icon:'✦'},
+        highlights:{icon:'✦',label:'新亮点',desc:'描述'},
+        works:{id:'work-'+Date.now(),title:'新作品',category:'主图 / Banner 设计',type:'image',thumbnail:'',bgGrad:'linear-gradient(135deg,#1a2a3a,#6366f1)',images:[],videoUrl:'',brief:'',role:'',date:'2026.05',tools:[],achievement:'',designIntro:'',showCase:[],designResult:''},
+        'about.skills':{name:'新技能',level:0.8},
+        'about.experience':{period:'2025-至今',company:'公司名',role:'职位',desc:'描述'},
+        'about.achievements':{icon:'✦',title:'新成就',year:'2025',desc:'描述'},
+        'about.testimonials':{quote:'评价内容',author:'评价人',role:''},
+        socials:{name:'平台',url:'#',icon:'✦'}
+      };
+      const arr=getByPath(siteData,path);
+      if(!arr) return;
+      arr.push(defaults[path]||{});
+      markDirty(); renderAll();
+    }
+    function editArrItem(path,index,keys){
+      const arr=getByPath(siteData,path);
+      if(!arr||!arr[index]) return;
+      let html='';
+      keys.forEach(k=>{html+=`<div class="ae-field"><label>${k}</label><input id="ea-${k}" value="${esc(String(arr[index][k]||''))}" /></div>`;});
+      document.getElementById('edit-title').textContent='编辑项目';
+      document.getElementById('edit-body').innerHTML=html;
+      document.getElementById('edit-modal').classList.add('open');
+      editTarget={type:'arr',path:path,index:index,keys:keys};
+    }
+    // Override saveEdit for arr type
+    const origSaveEdit=saveEdit;
+    saveEdit=function(){
+      if(editTarget&&editTarget.type==='arr'){
+        const arr=getByPath(siteData,editTarget.path);
+        editTarget.keys.forEach(k=>{
+          const v=document.getElementById('ea-'+k).value;
+          if(k==='level') arr[editTarget.index][k]=parseFloat(v)||0;
+          else arr[editTarget.index][k]=v;
+        });
+        markDirty(); renderAll(); closeEdit();
+        return;
+      }
+      origSaveEdit();
+    };
+
+    // ── Edit Work ──
+    let editingWorkIdx=-1;
+    function editWork(i){
+      const w=siteData.works[i];
+      if(!w) return;
+      editingWorkIdx=i;
+      let html='';
+      [['id','ID'],['title','标题'],['category','分类'],['type','类型(image/video)'],
+       ['date','日期'],['role','角色'],['thumbnail','缩略图'],
+       ['brief','简介'],['achievement','成果'],['designIntro','设计思路'],['designResult','设计成果']].forEach(([k,l])=>{
+        html+=`<div class="ae-field"><label>${l}</label><input id="ew-${k}" value="${esc(w[k]||'')}" /></div>`;
+      });
+      html+=`<div class="ae-field"><label>工具（逗号分隔）</label><input id="ew-tools" value="${esc((w.tools||[]).join(', '))}" /></div>`;
+      html+=`<div class="ae-field"><label>图片路径（逗号分隔）</label><textarea id="ew-images" rows="2">${esc((w.images||[]).join(', '))}</textarea></div>`;
+      html+=`<div style="font-size:12px;color:#888">ShowCase: ${(w.showCase||[]).length}项（文本编辑暂不支持，需手动改 site-data.js）</div>`;
+      document.getElementById('edit-title').textContent='编辑作品';
+      document.getElementById('edit-body').innerHTML=html;
+      document.getElementById('edit-modal').classList.add('open');
+      editTarget={type:'work',index:i};
+    }
+    // Extend saveEdit for work type
+    const origSaveEdit2=saveEdit;
+    saveEdit=function(){
+      if(editTarget&&editTarget.type==='work'){
+        const w=siteData.works[editTarget.index];
+        ['id','title','category','type','date','role','thumbnail','brief','achievement','designIntro','designResult'].forEach(k=>{w[k]=document.getElementById('ew-'+k).value;});
+        w.tools=document.getElementById('ew-tools').value.split(',').map(s=>s.trim()).filter(Boolean);
+        w.images=document.getElementById('ew-images').value.split(',').map(s=>s.trim()).filter(Boolean);
+        markDirty(); renderWorksGrid(); closeEdit();
+        return;
+      }
+      origSaveEdit2();
+    };
+    function addWork(){
+      siteData.works=siteData.works||[];
+      siteData.works.push({id:'work-'+Date.now(),title:'新作品',category:'主图 / Banner 设计',type:'image',thumbnail:'',bgGrad:'linear-gradient(135deg,#1a2a3a,#6366f1)',images:[],videoUrl:'',brief:'',role:'',date:'2026.05',tools:[],achievement:'',designIntro:'',showCase:[],designResult:''});
+      markDirty(); renderWorksGrid();
+    }
+
+    // ── Serialize ──
+    function ser(obj,indent=0){
+      const sp='  '.repeat(indent),sp2='  '.repeat(indent+1);
+      if(obj===null) return 'null';
+      if(typeof obj==='string') return "'"+obj.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\n/g,'\\n')+"'";
+      if(typeof obj==='number'||typeof obj==='boolean') return String(obj);
+      if(Array.isArray(obj)){
+        if(obj.length===0) return '[]';
+        if(obj.every(x=>typeof x!=='object'||x===null)) return '['+obj.map(x=>ser(x,0)).join(', ')+']';
+        return '[\n'+obj.map(x=>sp2+ser(x,indent+1)).join(',\n')+'\n'+sp+']';
+      }
+      if(typeof obj==='object'){
+        const keys=Object.keys(obj);
+        if(keys.length===0) return '{}';
+        return '{\n'+keys.map(k=>sp2+k+': '+ser(obj[k],indent+1)).join(',\n')+'\n'+sp+'}';
+      }
+      return String(obj);
+    }
+
+    async function saveAll(){
+      const js='/**\n * ════════════════════════════════\n * ★ 站点内容数据 ★\n * 管理后台可视化编辑生成\n * ════════════════════════════════\n */\n\nexport const siteData = '+ser(siteData,0)+';\n';
+      toast('保存中...');
+      const result=await ghPut(DATA_PATH,js,'feat: 可视化编辑更新',dataSha);
+      if(result){
+        dataSha=result.content.sha; dirty=false;
+        document.getElementById('dirty-status').textContent='已保存 ✓';
+        document.getElementById('dirty-status').style.color='#22c55e';
+        toast('✅ 保存成功！1-2分钟后网站自动更新','success');
+      }else{toast('❌ 保存失败','error');}
+    }
+    function markDirty(){
+      dirty=true;
+      document.getElementById('dirty-status').textContent='● 有修改';
+      document.getElementById('dirty-status').style.color='#f59e0b';
+    }
+
+    // ── Tab Switch ──
+    document.querySelectorAll('.admin-bar-tab').forEach(tab=>{
+      tab.addEventListener('click',()=>{
+        document.querySelectorAll('.admin-bar-tab').forEach(t=>t.classList.remove('active'));
+        document.querySelectorAll('.admin-page').forEach(p=>p.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById('page-'+tab.dataset.page).classList.add('active');
+        currentPage=tab.dataset.page;
+      });
     });
-    w.tools=document.getElementById('ew-tools').value.split(',').map(s=>s.trim()).filter(Boolean);
-    w.images=document.getElementById('ew-images').value.split(',').map(s=>s.trim()).filter(Boolean);
-    markDirty();
-    renderWorks();
-  }
-  closeEdit();
-}
-function closeEdit(){
-  document.getElementById('edit-modal').classList.remove('open');
-  editTarget=null;
-}
 
-// ── Delete from array ──
-function delArr(path,index){
-  const arr=getByPath(siteData,path);
-  if(!arr) return;
-  const name=arr[index]?.title||arr[index]?.label||arr[index]?.name||('#'+(index+1));
-  if(!confirm('删除「'+name+'」？')) return;
-  arr.splice(index,1);
-  markDirty();
-  renderAll();
-  curTab();
-}
+    // ── Modal click-outside ──
+    document.getElementById('edit-modal').addEventListener('click',e=>{
+      if(e.target===e.currentTarget) closeEdit();
+    });
 
-// ── Add item ──
-function addItem(path){
-  const defaults={
-    stats:{value:'数字',label:'描述',icon:'✦'},
-    highlights:{icon:'✦',label:'标题',desc:'描述'},
-    works:{id:'work-'+Date.now(),title:'新作品',category:'主图 / Banner 设计',type:'image',thumbnail:'',bgGrad:'linear-gradient(135deg,#1a2a3a,#6366f1)',images:[],videoUrl:'',brief:'',role:'',date:'2026.05',tools:[],achievement:'',designIntro:'',showCase:[],designResult:''},
-    'about.skills':{name:'技能名',level:0.8},
-    'about.experience':{period:'2025-至今',company:'公司',role:'职位',desc:'描述'},
-    'about.achievements':{icon:'✦',title:'成就',year:'2025',desc:'描述'},
-    'about.testimonials':{quote:'评价内容',author:'评价人',role:''},
-    socials:{name:'平台',url:'#',icon:'✦'}
-  };
-  const arr=getByPath(siteData,path);
-  if(!arr) return;
-  arr.push(defaults[path]||{});
-  markDirty();
-  renderAll();
-  curTab();
-}
+    // ── File Upload ──
+    let pendingFiles=[];
+    function previewFiles(){
+      pendingFiles=Array.from(document.getElementById('file-input').files);
+      document.getElementById('file-preview').innerHTML=pendingFiles.map(f=>{
+        const url=URL.createObjectURL(f), isV=f.type.startsWith('video/');
+        return `<div style="text-align:center"><div style="width:80px;height:80px;overflow:hidden;border-radius:6px;border:1px solid #333">${isV?`<video src="${url}" style="width:100%;height:100%;object-fit:cover"></video>`:`<img src="${url}" style="width:100%;height:100%;object-fit:cover" />`}</div><div style="font-size:10px;color:#888;max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${f.name}</div></div>`;
+      }).join('');
+    }
+    async function uploadFiles(){
+      if(!pendingFiles.length){toast('请先选择文件','error');return;}
+      toast('上传中...'); let ok=0;
+      for(const f of pendingFiles){
+        const b64=await new Promise(r=>{const rd=new FileReader();rd.onload=()=>r(rd.result.split(',')[1]);rd.readAsDataURL(f);});
+        const path=IMG_DIR+Date.now()+'_'+f.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+        if(await ghPut(path,b64,'upload: '+f.name)) ok++; else toast('失败: '+f.name,'error');
+      }
+      if(ok){toast('✅ 成功 '+ok+' 个文件','success');pendingFiles=[];document.getElementById('file-preview').innerHTML='';document.getElementById('file-input').value='';loadFileList();}
+    }
+    async function loadFileList(){
+      const files=await ghListDir(IMG_DIR);
+      if(!Array.isArray(files)) return;
+      document.getElementById('existing-files').innerHTML=files.filter(f=>f.type==='file').map(f=>{
+        const isV=f.name.match(/\.(mp4|webm|mov)$/i);
+        return `<div class="file-item">${isV?`<video src="${f.download_url}" style="width:110px;height:110px;object-fit:cover;border-radius:8px;border:1px solid rgba(255,255,255,.08)"></video>`:`<img src="${f.download_url}" loading="lazy" />`}<div class="fn" title="点击复制" onclick="copyPath('images/${f.name}')">images/${f.name}</div></div>`;
+      }).join('');
+    }
+    function copyPath(p){navigator.clipboard.writeText(p).then(()=>toast('已复制: '+p));}
 
-// ── Serialize ──
-function ser(obj,indent=0){
-  const sp='  '.repeat(indent),sp2='  '.repeat(indent+1);
-  if(obj===null) return 'null';
-  if(typeof obj==='string') return "'"+obj.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\n/g,'\\n')+"'";
-  if(typeof obj==='number'||typeof obj==='boolean') return String(obj);
-  if(Array.isArray(obj)){
-    if(obj.length===0) return '[]';
-    if(obj.every(x=>typeof x!=='object'||x===null)) return '['+obj.map(x=>ser(x,0)).join(', ')+']';
-    return '[\n'+obj.map(x=>sp2+ser(x,indent+1)).join(',\n')+'\n'+sp+']';
-  }
-  if(typeof obj==='object'){
-    const keys=Object.keys(obj);
-    if(keys.length===0) return '{}';
-    return '{\n'+keys.map(k=>sp2+k+': '+ser(obj[k],indent+1)).join(',\n')+'\n'+sp+'}';
-  }
-  return String(obj);
-}
-
-async function saveAll(){
-  const js='/**\n * ═══════════════════════════════════════\n * ★ 站点内容数据 ★\n * 由管理后台生成\n * ═══════════════════════════════════════\n */\n\nexport const siteData = '+ser(siteData,0)+';\n';
-  toast('正在保存...');
-  const result=await ghPut(DATA_PATH,js,'feat: 管理后台可视化编辑',dataSha);
-  if(result){
-    dataSha=result.content.sha;
-    dirty=false;
-    document.getElementById('dirty-badge').textContent='已保存 ✓';
-    document.getElementById('dirty-badge').style.color='#22c55e';
-    toast('✅ 保存成功！1-2 分钟后网站自动更新','success');
-  }else{
-    toast('❌ 保存失败','error');
-  }
-}
-
-function markDirty(){
-  dirty=true;
-  document.getElementById('dirty-badge').textContent='● 有修改';
-  document.getElementById('dirty-badge').style.color='#f59e0b';
-}
-
-// ── Tab Switch ──
-let currentTab='home';
-function curTab(){switchTab(currentTab);}
-function switchTab(name){
-  currentTab=name;
-  document.querySelectorAll('.cms-tab').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.cms-panel').forEach(p=>p.classList.remove('active'));
-  document.querySelector(`.cms-tab[data-tab="${name}"]`).classList.add('active');
-  document.getElementById('panel-'+name).classList.add('active');
-}
-
-// ── Editable Click ──
-document.addEventListener('click',e=>{
-  const el=e.target.closest('.editable');
-  if(!el||!el.dataset.path) return;
-  const path=el.dataset.path;
-  const val=getByPath(siteData,path);
-  const label=path.replace(/\./g,' › ');
-  openEditField(path,label,val,typeof val==='string'&&val.length>50);
-});
-
-// ── Tab Click ──
-document.querySelectorAll('.cms-tab').forEach(btn=>{
-  btn.addEventListener('click',()=>switchTab(btn.dataset.tab));
-});
-
-// ── Edit Modal Click-outside ──
-document.getElementById('edit-modal').addEventListener('click',e=>{
-  if(e.target===e.currentTarget) closeEdit();
-});
-
-// ── File Upload ──
-let pendingFiles=[];
-function previewFiles(){
-  const input=document.getElementById('file-input');
-  pendingFiles=Array.from(input.files);
-  document.getElementById('file-preview').innerHTML=pendingFiles.map(f=>{
-    const url=URL.createObjectURL(f);
-    const isV=f.type.startsWith('video/');
-    return `<div class="file-preview-item">${isV?`<video src="${url}" controls></video>`:`<img src="${url}" />`}<div class="name">${f.name}</div></div>`;
-  }).join('');
-}
-async function uploadFiles(){
-  if(pendingFiles.length===0){toast('请先选择文件','error');return;}
-  toast('上传中...');
-  let ok=0;
-  for(const f of pendingFiles){
-    const b64=await new Promise(r=>{const rd=new FileReader();rd.onload=()=>r(rd.result.split(',')[1]);rd.readAsDataURL(f);});
-    const path=IMG_DIR+Date.now()+'_'+f.name.replace(/[^a-zA-Z0-9._-]/g,'_');
-    const result=await ghPut(path,b64,'upload: '+f.name);
-    if(result) ok++; else toast('失败: '+f.name,'error');
-  }
-  if(ok>0){toast('✅ 成功 '+ok+' 个！','success');pendingFiles=[];document.getElementById('file-preview').innerHTML='';document.getElementById('file-input').value='';loadFileList();}
-}
-async function loadFileList(){
-  const files=await ghListDir(IMG_DIR);
-  if(!Array.isArray(files)) return;
-  document.getElementById('existing-files').innerHTML=files.filter(f=>f.type==='file').map(f=>{
-    const isV=f.name.match(/\.(mp4|webm|mov)$/i);
-    return `<div class="file-item">${isV?`<video src="${f.download_url}" style="width:100px;height:100px;object-fit:cover;border-radius:4px;border:1px solid #333"></video>`:`<img src="${f.download_url}" loading="lazy" />`}<div class="fn" title="点击复制路径" onclick="copyPath('images/${f.name}')">images/${f.name}</div></div>`;
-  }).join('');
-}
-function copyPath(p){navigator.clipboard.writeText(p).then(()=>toast('已复制: '+p));}
-
-// ── Toast ──
-function toast(msg,type=''){
-  const el=document.getElementById('admin-toast');
-  el.textContent=msg; el.className='admin-toast '+type; el.classList.add('show');
-  setTimeout(()=>el.classList.remove('show'),4000);
-}
-</script>
+    // ── Toast ──
+    function toast(msg,type=''){
+      const el=document.getElementById('admin-toast');
+      el.textContent=msg; el.className='admin-toast '+type; el.classList.add('show');
+      setTimeout(()=>el.classList.remove('show'),4000);
+    }
+  </script>
 
 </body>
 </html>
