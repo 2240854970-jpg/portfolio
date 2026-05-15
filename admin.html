@@ -16,7 +16,7 @@
   <div class="admin-modal-overlay" id="login-modal">
     <div class="admin-modal">
       <h2>✦ 管理后台</h2>
-      <p>登录后可直接在页面编辑内容</p>
+      <p>登录后可编辑全站内容</p>
       <div class="form-group">
         <label>管理密码</label>
         <input type="password" id="admin-pwd" placeholder="请输入密码" />
@@ -30,17 +30,113 @@
     </div>
   </div>
 
-  <!-- ====== Site Preview (rendered by JS) ====== -->
-  <div id="site-preview"></div>
+  <!-- ====== Main CMS UI ====== -->
+  <div id="cms-panel" style="display:none">
+    <!-- Tab Nav -->
+    <div class="cms-tabs">
+      <button class="cms-tab active" data-tab="basic">基本信息</button>
+      <button class="cms-tab" data-tab="home">首页模块</button>
+      <button class="cms-tab" data-tab="works">作品管理</button>
+      <button class="cms-tab" data-tab="about">关于我</button>
+      <button class="cms-tab" data-tab="contact">联系方式</button>
+      <button class="cms-tab" data-tab="files">📁 文件上传</button>
+    </div>
 
-  <!-- ====== Inline Editor Modal ====== -->
-  <div class="inline-editor-overlay" id="editor-modal">
-    <div class="inline-editor">
-      <h3 id="editor-title">编辑</h3>
-      <div id="editor-fields"></div>
-      <div class="inline-editor-actions">
-        <button class="btn btn-editor-cancel" onclick="closeEditor()">取消</button>
-        <button class="btn btn-editor-save" onclick="saveEditor()">保存</button>
+    <!-- Tab Panels -->
+    <div class="cms-panels">
+      <!-- Basic Info -->
+      <div class="cms-panel active" id="panel-basic">
+        <div class="cms-field"><label>姓名</label><input id="f-name" /></div>
+        <div class="cms-field"><label>英文名</label><input id="f-nameEn" /></div>
+        <div class="cms-field"><label>职位</label><input id="f-title" /></div>
+        <div class="cms-field"><label>一句话介绍</label><input id="f-tagline" /></div>
+        <div class="cms-field"><label>邮箱</label><input id="f-email" /></div>
+        <div class="cms-field"><label>管理密码</label><input id="f-adminPassword" /></div>
+        <div class="cms-field"><label>页脚文字</label><input id="f-footer" /></div>
+      </div>
+
+      <!-- Home -->
+      <div class="cms-panel" id="panel-home">
+        <h3>数据条 (Stats)</h3>
+        <div id="stats-list"></div>
+        <button class="cms-btn-sm" onclick="addStat()">+ 添加</button>
+
+        <h3>首页精选作品</h3>
+        <div class="cms-field"><label>精选作品 ID（逗号分隔）</label><textarea id="f-featuredWorkIds" rows="2"></textarea></div>
+
+        <h3>核心价值 (Highlights)</h3>
+        <div id="highlights-list"></div>
+        <button class="cms-btn-sm" onclick="addHighlight()">+ 添加</button>
+      </div>
+
+      <!-- Works -->
+      <div class="cms-panel" id="panel-works">
+        <div id="works-list"></div>
+        <button class="cms-btn" onclick="addWork()">+ 新建作品</button>
+      </div>
+
+      <!-- About -->
+      <div class="cms-panel" id="panel-about">
+        <h3>个人简介</h3>
+        <div class="cms-field"><label>简介 1</label><textarea id="f-bio1" rows="3"></textarea></div>
+        <div class="cms-field"><label>简介 2</label><textarea id="f-bio2" rows="3"></textarea></div>
+        <div class="cms-field"><label>简介 3</label><textarea id="f-bio3" rows="3"></textarea></div>
+
+        <h3>技能</h3>
+        <div id="skills-list"></div>
+        <button class="cms-btn-sm" onclick="addSkill()">+ 添加</button>
+
+        <h3>工作经历</h3>
+        <div id="experience-list"></div>
+        <button class="cms-btn-sm" onclick="addExperience()">+ 添加</button>
+
+        <h3>成就</h3>
+        <div id="achievements-list"></div>
+        <button class="cms-btn-sm" onclick="addAchievement()">+ 添加</button>
+
+        <h3>评价</h3>
+        <div id="testimonials-list"></div>
+        <button class="cms-btn-sm" onclick="addTestimonial()">+ 添加</button>
+      </div>
+
+      <!-- Contact -->
+      <div class="cms-panel" id="panel-contact">
+        <h3>社交链接</h3>
+        <div id="socials-list"></div>
+        <button class="cms-btn-sm" onclick="addSocial()">+ 添加</button>
+      </div>
+
+      <!-- Files -->
+      <div class="cms-panel" id="panel-files">
+        <h3>上传文件</h3>
+        <div class="cms-field">
+          <label>选择图片或视频</label>
+          <input type="file" id="file-input" accept="image/*,video/*" multiple onchange="previewFiles()" />
+        </div>
+        <div id="file-preview"></div>
+        <button class="cms-btn" onclick="uploadFiles()">📤 上传到服务器</button>
+        <button class="cms-btn" style="background:#333" onclick="loadFileList()">🔄 刷新已有文件</button>
+
+        <h3>已有文件</h3>
+        <div id="existing-files"></div>
+      </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="cms-toolbar">
+      <span>已修改 <b id="dirty-count">0</b> 项</span>
+      <button class="cms-btn cms-btn-save" onclick="saveAll()">💾 保存并部署</button>
+    </div>
+  </div>
+
+  <!-- ====== Work Editor Modal ====== -->
+  <div class="admin-modal-overlay" id="work-modal">
+    <div class="admin-modal" style="max-width:700px;max-height:85vh;overflow-y:auto">
+      <h3 id="work-modal-title">编辑作品</h3>
+      <div id="work-modal-body"></div>
+      <div style="margin-top:16px;display:flex;gap:8px">
+        <button class="btn" onclick="saveWork()">保存</button>
+        <button class="btn" style="background:#333" onclick="closeWorkModal()">取消</button>
       </div>
     </div>
   </div>
@@ -48,315 +144,395 @@
   <!-- ====== Toast ====== -->
   <div class="admin-toast" id="admin-toast"></div>
 
-  <script>
-    const OWNER = '2240854970-jpg'
-    const REPO = 'portfolio'
-    const FILE_PATH = 'src/data/site-data.js'
-    const BRANCH = 'main'
+  <style>
+    .cms-tabs { display:flex; flex-wrap:wrap; gap:4px; padding:16px 16px 0; background:#0a0a0a; position:sticky; top:0; z-index:100; }
+    .cms-tab { padding:8px 14px; border:none; border-radius:6px 6px 0 0; background:transparent; color:#888; cursor:pointer; font-size:13px; }
+    .cms-tab.active { background:#141414; color:#c084fc; }
+    .cms-tab:hover { color:#ccc; }
+    .cms-panels { padding:16px; background:#141414; min-height:60vh; }
+    .cms-panel { display:none; }
+    .cms-panel.active { display:block; }
+    .cms-panel h3 { color:#c084fc; font-size:15px; margin:20px 0 10px; border-bottom:1px solid #222; padding-bottom:6px; }
+    .cms-panel h3:first-child { margin-top:0; }
+    .cms-field { margin-bottom:12px; }
+    .cms-field label { display:block; font-size:12px; color:#888; margin-bottom:4px; }
+    .cms-field input, .cms-field textarea, .cms-field select {
+      width:100%; padding:8px 12px; border-radius:6px; border:1px solid #333;
+      background:#1a1a1a; color:#ddd; font-size:13px; box-sizing:border-box;
+    }
+    .cms-field textarea { resize:vertical; }
+    .cms-btn { padding:10px 20px; border:none; border-radius:8px; background:#c084fc; color:#000; font-weight:600; cursor:pointer; font-size:14px; margin-top:8px; }
+    .cms-btn-sm { padding:4px 12px; border:1px solid #444; border-radius:6px; background:transparent; color:#888; cursor:pointer; font-size:12px; margin-top:4px; }
+    .cms-btn-sm:hover { border-color:#c084fc; color:#c084fc; }
+    .cms-btn-save { background:#22c55e; color:#000; }
+    .cms-toolbar { position:sticky; bottom:0; padding:12px 16px; background:#0a0a0a; border-top:1px solid #222; display:flex; justify-content:space-between; align-items:center; font-size:13px; color:#888; }
+    .cms-card { background:#1a1a1a; border:1px solid #222; border-radius:8px; padding:12px; margin-bottom:8px; }
+    .cms-card-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+    .cms-card-title { font-weight:600; color:#ddd; font-size:14px; }
+    .cms-card-actions { display:flex; gap:6px; }
+    .cms-card-actions button { padding:3px 10px; border:1px solid #444; border-radius:4px; background:transparent; color:#888; cursor:pointer; font-size:11px; }
+    .cms-card-actions button:hover { border-color:#c084fc; color:#c084fc; }
+    .cms-card-actions button.danger:hover { border-color:#ef4444; color:#ef4444; }
+    .cms-card-desc { font-size:12px; color:#666; }
+    .file-preview-item { display:inline-block; margin:4px; position:relative; }
+    .file-preview-item img, .file-preview-item video { width:100px; height:100px; object-fit:cover; border-radius:4px; border:1px solid #333; }
+    .file-preview-item .name { font-size:10px; color:#888; text-align:center; max-width:100px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .file-grid { display:flex; flex-wrap:wrap; gap:8px; }
+    .file-item { text-align:center; }
+    .file-item img, .file-item video { width:120px; height:120px; object-fit:cover; border-radius:6px; border:1px solid #333; }
+    .file-item .fn { font-size:11px; color:#888; margin-top:2px; max-width:120px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; cursor:pointer; }
+    .file-item .fn:hover { color:#c084fc; }
+  </style>
 
-    let siteData = null
-    let fileContent = ''
-    let fileSha = ''
-    let gitToken = ''
-    let editQueue = []
-    let currentEditField = null
+  <script>
+    const OWNER = '2240854970-jpg', REPO = 'portfolio', DATA_PATH = 'src/data/site-data.js', IMG_DIR = 'public/images/', BRANCH = 'main';
+    let siteData = null, fileSha = '', gitToken = '', dirty = false, dataSha = '';
 
     // ── GitHub API ──
-    async function gh(path) {
+    async function ghGet(path) {
       const r = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`, {
         headers: { 'Authorization': `Bearer ${gitToken}`, 'Accept': 'application/vnd.github+json' }
-      })
-      return r.ok ? await r.json() : null
+      });
+      return r.ok ? await r.json() : null;
     }
-
-    async function ghPut(path, content, msg) {
-      const b64 = btoa(unescape(encodeURIComponent(content)))
+    async function ghPut(path, content, msg, sha) {
+      const b64 = btoa(unescape(encodeURIComponent(content)));
+      const body = { message: msg, content: b64, branch: BRANCH };
+      if (sha) body.sha = sha;
       const r = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`, {
         method: 'PUT',
         headers: { 'Authorization': `Bearer ${gitToken}`, 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: msg, content: b64, sha: fileSha, branch: BRANCH })
-      })
-      if (r.ok) { const j = await r.json(); fileSha = j.content.sha }
-      return r.ok
+        body: JSON.stringify(body)
+      });
+      return r.ok ? await r.json() : null;
     }
+    async function ghListDir(path) {
+      const r = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`, {
+        headers: { 'Authorization': `Bearer ${gitToken}`, 'Accept': 'application/vnd.github+json' }
+      });
+      return r.ok ? await r.json() : [];
+    }
+    function decode64(b64) { try { return decodeURIComponent(escape(atob(b64))); } catch { return atob(b64); } }
 
-    function decode(b64) {
-      try { return decodeURIComponent(escape(atob(b64))) } catch { return atob(b64) }
+    // ── Parse siteData ──
+    function parseSiteData(raw) {
+      const m = raw.match(/export const siteData\s*=\s*({[\s\S]*?)\n\s*(?:export|$)/);
+      if (!m) return null;
+      try { return new Function('return ' + m[1])(); } catch(e) { return null; }
     }
 
     // ── Login ──
     async function adminLogin() {
-      const pwd = document.getElementById('admin-pwd').value
-      gitToken = document.getElementById('admin-token').value
-      const resp = await gh(FILE_PATH)
-      if (!resp) { showToast('无法连接 GitHub', 'error'); return }
-      fileContent = decode(resp.content)
-      fileSha = resp.sha
-      const pm = fileContent.match(/adminPassword['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
-      if (!pm || pm[1] !== pwd) { document.getElementById('admin-error').style.display = 'block'; return }
-      document.getElementById('admin-error').style.display = 'none'
-      document.getElementById('login-modal').classList.remove('open')
-      document.body.classList.add('edit-mode')
-      document.querySelector('.admin-toolbar')?.classList.add('open')
-      renderSite()
+      gitToken = document.getElementById('admin-token').value;
+      const pwd = document.getElementById('admin-pwd').value;
+      const resp = await ghGet(DATA_PATH);
+      if (!resp) { toast('无法连接 GitHub', 'error'); return; }
+      const raw = decode64(resp.content);
+      dataSha = resp.sha;
+      const sd = parseSiteData(raw);
+      if (!sd || sd.adminPassword !== pwd) { document.getElementById('admin-error').style.display = 'block'; return; }
+      siteData = sd;
+      document.getElementById('admin-error').style.display = 'none';
+      document.getElementById('login-modal').classList.remove('open');
+      document.getElementById('cms-panel').style.display = 'block';
+      document.getElementById('admin-entry').style.display = 'none';
+      document.body.style.background = '#0a0a0a';
+      renderAll();
     }
 
-    // ── Render Site Preview ──
-    function renderSite() {
-      // Parse data
-      const g = (re) => { const m = fileContent.match(re); return m ? m[1].trim() : '' }
-      const name = g(/name['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
-      const title = g(/title['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
-      const tagline = g(/tagline['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
-      const email = g(/email['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
-      const footer = g(/footer['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
-
-      const statsBlock = fileContent.match(/stats:\s*\[(.*?)\]/s)
-      const stats = statsBlock ? [...statsBlock[1].matchAll(/\{([^}]+)\}/g)].map(m => {
-        const v = m[1].match(/value['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
-        const l = m[1].match(/label['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
-        const i = m[1].match(/icon['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
-        return { value: v ? v[1] : '', label: l ? l[1] : '', icon: i ? i[1] : '' }
-      }) : []
-
-      const highlightsBlock = fileContent.match(/highlights:\s*\[(.*?)\]\s*\],/s)
-      const highlights = highlightsBlock ? [...highlightsBlock[1].matchAll(/\{([^}]+)\}/g)].map(m => {
-        const ic = m[1].match(/icon['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
-        const la = m[1].match(/label['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
-        const d = m[1].match(/desc['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
-        return { icon: ic ? ic[1] : '', label: la ? la[1] : '', desc: d ? d[1] : '' }
-      }) : []
-
-      const bio1 = g(/bio1['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
-      const bio2 = g(/bio2['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
-      const bio3 = g(/bio3['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
-
-      const socialsMatch = fileContent.match(/socials:\s*\[(.*?)\]\s*\],/s)
-      const socials = socialsMatch ? [...socialsMatch[1].matchAll(/\{([^}]+)\}/g)].map(m => {
-        const n = m[1].match(/name['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
-        const u = m[1].match(/url['"]?\s*[:=]\s*['"]([^'"]+)['"]/)
-        return { name: n ? n[1] : '', url: u ? u[1] : '' }
-      }) : []
-
-      // ── Build HTML ──
-      const html = `
-        <!-- Hero -->
-        <section class="hero" style="height:80vh;min-height:500px">
-          <div class="hero-overlay"></div>
-          <div class="hero-content">
-            <div class="hero-text">
-              <p class="hero-label" style="opacity:1">Portfolio · 跨境电商平面设计</p>
-              <h1 class="hero-title" style="font-size:clamp(36px,6vw,72px)">
-                <span class="hero-line" style="overflow:visible">
-                  <span data-field="name" class="edit-overlay" style="display:inline-block">${name}</span>
-                </span>
-                <span class="hero-line" style="font-size:0.5em;font-weight:400;overflow:visible">
-                  <span data-field="title" class="edit-overlay" style="display:inline-block">${title}</span>
-                </span>
-              </h1>
-              <p class="hero-sub" style="opacity:1;transform:none">
-                <span data-field="tagline" class="edit-overlay" style="display:inline-block">${tagline}</span>
-              </p>
-            </div>
-          </div>
-        </section>
-
-        <!-- Stats -->
-        <section class="section stats-section">
-          <div class="container">
-            <div class="stats-grid">
-              ${stats.map((s, i) => `
-                <div class="stat-item edit-overlay" style="opacity:1;transform:none" data-stat="${i}">
-                  <span class="stat-icon">${s.icon}</span>
-                  <span class="stat-value" data-field="stat-${i}-value">${s.value}</span>
-                  <span class="stat-label" data-field="stat-${i}-label">${s.label}</span>
-                </div>
-              `).join('')}
-            </div>
-          </div>
-        </section>
-
-        <!-- Highlights -->
-        <section class="section highlights-section">
-          <div class="container">
-            <div class="section-header">
-              <h2 class="section-title"><span class="section-number">✦</span><span class="section-heading">核心价值</span></h2>
-            </div>
-            <div class="highlights-grid">
-              ${highlights.map((h, i) => `
-                <div class="highlight-card edit-overlay" style="opacity:1;transform:none" data-highlight="${i}">
-                  <span class="highlight-icon">${h.icon}</span>
-                  <h3 class="highlight-title" data-field="hl-${i}-label">${h.label}</h3>
-                  <p class="highlight-desc" data-field="hl-${i}-desc">${h.desc}</p>
-                </div>
-              `).join('')}
-            </div>
-          </div>
-        </section>
-
-        <!-- About Brief -->
-        <section class="section about-brief-section">
-          <div class="container">
-            <div class="about-brief" style="opacity:1;transform:none">
-              <div class="about-brief-text">
-                <h2 class="section-title"><span class="section-number">✦</span><span class="section-heading">关于我</span></h2>
-                <p class="about-brief-p edit-overlay" data-field="bio1">${bio1}</p>
-                <p class="about-brief-p edit-overlay" data-field="bio2">${bio2}</p>
-                <p class="about-brief-p edit-overlay" data-field="bio3">${bio3}</p>
-              </div>
-              <div class="about-brief-visual">
-                <div class="about-avatar-frame">
-                  <div class="about-avatar-placeholder"><span class="avatar-icon">✦</span></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- Contact -->
-        <section class="section contact-section">
-          <div class="container">
-            <div class="contact-inner" style="opacity:1;transform:none">
-              <h2 class="section-title" style="justify-content:center">
-                <span class="section-number">✦</span>
-                <span class="section-heading">联系我</span>
-              </h2>
-              <p class="contact-text edit-overlay" data-field="email" style="opacity:1">有兴趣聊一聊？给我发邮件吧</p>
-              <a class="contact-email" style="opacity:1">
-                <span class="email-text" data-field="email">${email}</span>
-                <span class="email-arrow">→</span>
-              </a>
-              <div class="contact-socials">
-                ${socials.map(s => `<a class="social-link">${s.name}</a>`).join('')}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- Footer -->
-        <footer class="footer">
-          <div class="container">
-            <div class="footer-inner">
-              <span class="footer-copy" data-field="footer">${footer}</span>
-              <a class="footer-top">↑ 回到顶部</a>
-            </div>
-          </div>
-        </footer>
-
-        <!-- Admin Toolbar -->
-        <div class="admin-toolbar open">
-          <span class="admin-toolbar-status">已登录 · <span class="has-changes" id="change-count">0 项修改</span></span>
-          <div class="admin-toolbar-actions">
-            <button class="btn btn-admin-cancel" onclick="resetChanges()">重置</button>
-            <button class="btn btn-admin-save" onclick="saveAll()">💾 保存部署</button>
-          </div>
-        </div>
-      `
-
-      document.getElementById('site-preview').innerHTML = html
-      bindEditButtons()
+    // ── Render All ──
+    function renderAll() {
+      const d = siteData;
+      document.getElementById('f-name').value = d.name || '';
+      document.getElementById('f-nameEn').value = d.nameEn || '';
+      document.getElementById('f-title').value = d.title || '';
+      document.getElementById('f-tagline').value = d.tagline || '';
+      document.getElementById('f-email').value = d.email || '';
+      document.getElementById('f-adminPassword').value = d.adminPassword || '';
+      document.getElementById('f-footer').value = d.footer || '';
+      document.getElementById('f-featuredWorkIds').value = (d.featuredWorkIds || []).join(', ');
+      document.getElementById('f-bio1').value = (d.about||{}).bio1 || '';
+      document.getElementById('f-bio2').value = (d.about||{}).bio2 || '';
+      document.getElementById('f-bio3').value = (d.about||{}).bio3 || '';
+      renderStats();
+      renderHighlights();
+      renderWorks();
+      renderSkills();
+      renderExperience();
+      renderAchievements();
+      renderTestimonials();
+      renderSocials();
     }
 
-    // ── Edit System ──
-    function bindEditButtons() {
-      document.querySelectorAll('[data-field]').forEach(el => {
-        el.style.cursor = 'pointer'
-        el.title = '点击编辑'
-        el.addEventListener('click', (e) => {
-          e.stopPropagation()
-          openFieldEditor(el.dataset.field, el.textContent.trim())
-        })
-      })
+    function makeCard(title, desc, editFn, delFn) {
+      return `<div class="cms-card"><div class="cms-card-header"><span class="cms-card-title">${title}</span><div class="cms-card-actions"><button onclick="${editFn}">编辑</button><button class="danger" onclick="${delFn}">删除</button></div></div><div class="cms-card-desc">${desc||''}</div></div>`;
     }
 
-    function openFieldEditor(field, currentValue) {
-      currentEditField = field
-      document.getElementById('editor-title').textContent = `编辑 — ${field}`
-      document.getElementById('editor-fields').innerHTML = `
-        <label>内容</label>
-        <textarea id="editor-value" rows="4">${currentValue}</textarea>
-      `
-      document.getElementById('editor-modal').classList.add('open')
+    // Stats
+    function renderStats() {
+      const el = document.getElementById('stats-list');
+      el.innerHTML = (siteData.stats||[]).map((s,i) =>
+        makeCard(s.value+' '+s.label, s.icon, `editStat(${i})`, `delStat(${i})`)
+      ).join('');
+    }
+    function addStat() { siteData.stats = siteData.stats || []; siteData.stats.push({value:'数字',label:'描述',icon:'✦'}); markDirty(); renderStats(); }
+    function editStat(i) { editObj(siteData.stats[i], ['value','label','icon'], ()=>renderStats()); }
+    function delStat(i) { siteData.stats.splice(i,1); markDirty(); renderStats(); }
+
+    // Highlights
+    function renderHighlights() {
+      document.getElementById('highlights-list').innerHTML = (siteData.highlights||[]).map((h,i) =>
+        makeCard(h.label, h.desc, `editHighlight(${i})`, `delHighlight(${i})`)
+      ).join('');
+    }
+    function addHighlight() { siteData.highlights = siteData.highlights || []; siteData.highlights.push({icon:'✦',label:'标题',desc:'描述'}); markDirty(); renderHighlights(); }
+    function editHighlight(i) { editObj(siteData.highlights[i], ['icon','label','desc'], ()=>renderHighlights()); }
+    function delHighlight(i) { siteData.highlights.splice(i,1); markDirty(); renderHighlights(); }
+
+    // Works
+    function renderWorks() {
+      document.getElementById('works-list').innerHTML = (siteData.works||[]).map((w,i) =>
+        makeCard(w.title, w.category+' · '+w.date, `editWork(${i})`, `delWork(${i})`)
+      ).join('');
+    }
+    function addWork() {
+      siteData.works = siteData.works || [];
+      siteData.works.push({ id:'new-work-'+Date.now(), title:'新作品', category:'主图 / Banner 设计', type:'image', thumbnail:'', bgGrad:'linear-gradient(135deg,#1a2a3a,#6366f1)', images:[], videoUrl:'', brief:'', role:'', date:'2026.05', tools:[], achievement:'', designIntro:'', showCase:[], designResult:'' });
+      markDirty(); renderWorks();
+    }
+    function delWork(i) { if (confirm('确定删除「'+siteData.works[i].title+'」？')) { siteData.works.splice(i,1); markDirty(); renderWorks(); } }
+
+    let editingWorkIdx = -1;
+    function editWork(i) {
+      editingWorkIdx = i;
+      const w = siteData.works[i];
+      document.getElementById('work-modal-title').textContent = '编辑 — '+w.title;
+      const fields = [
+        ['id','ID'],['title','标题'],['category','分类'],['type','类型(image/video)'],['thumbnail','缩略图路径'],
+        ['bgGrad','背景渐变'],['videoUrl','视频链接'],['brief','简介'],['role','角色'],['date','日期'],
+        ['achievement','成果'],['designIntro','设计思路'],['designResult','设计成果']
+      ];
+      let html = fields.map(f => `<div class="cms-field"><label>${f[1]}</label><input id="wf-${f[0]}" value="${escHtml(w[f[0]]||'')}" /></div>`).join('');
+      html += `<div class="cms-field"><label>工具（逗号分隔）</label><input id="wf-tools" value="${escHtml((w.tools||[]).join(', '))}" /></div>`;
+      html += `<div class="cms-field"><label>图片（逗号分隔路径）</label><textarea id="wf-images" rows="2">${escHtml((w.images||[]).join(', '))}</textarea></div>`;
+      html += `<div class="cms-field"><label>ShowCase 数量：${(w.showCase||[]).length}</label></div>`;
+      document.getElementById('work-modal-body').innerHTML = html;
+      document.getElementById('work-modal').classList.add('open');
+    }
+    function saveWork() {
+      const w = siteData.works[editingWorkIdx];
+      ['id','title','category','type','thumbnail','bgGrad','videoUrl','brief','role','date','achievement','designIntro','designResult'].forEach(k => {
+        w[k] = document.getElementById('wf-'+k).value;
+      });
+      w.tools = document.getElementById('wf-tools').value.split(',').map(s=>s.trim()).filter(Boolean);
+      w.images = document.getElementById('wf-images').value.split(',').map(s=>s.trim()).filter(Boolean);
+      markDirty(); renderWorks(); closeWorkModal();
+    }
+    function closeWorkModal() { document.getElementById('work-modal').classList.remove('open'); editingWorkIdx = -1; }
+
+    // Skills
+    function renderSkills() {
+      const arr = (siteData.about||{}).skills || [];
+      document.getElementById('skills-list').innerHTML = arr.map((s,i) =>
+        makeCard(s.name, Math.round(s.level*100)+'%', `editSkill(${i})`, `delSkill(${i})`)
+      ).join('');
+    }
+    function addSkill() { if(!siteData.about) siteData.about = {}; siteData.about.skills = siteData.about.skills || []; siteData.about.skills.push({name:'技能名',level:0.8}); markDirty(); renderSkills(); }
+    function editSkill(i) { editObj(siteData.about.skills[i], ['name','level'], ()=>renderSkills()); }
+    function delSkill(i) { siteData.about.skills.splice(i,1); markDirty(); renderSkills(); }
+
+    // Experience
+    function renderExperience() {
+      const arr = (siteData.about||{}).experience || [];
+      document.getElementById('experience-list').innerHTML = arr.map((e,i) =>
+        makeCard(e.role+' @ '+e.company, e.period, `editExperience(${i})`, `delExperience(${i})`)
+      ).join('');
+    }
+    function addExperience() { if(!siteData.about) siteData.about = {}; siteData.about.experience = siteData.about.experience || []; siteData.about.experience.push({period:'2025 - 至今',company:'公司',role:'职位',desc:'描述'}); markDirty(); renderExperience(); }
+    function editExperience(i) { editObj(siteData.about.experience[i], ['period','company','role','desc'], ()=>renderExperience()); }
+    function delExperience(i) { siteData.about.experience.splice(i,1); markDirty(); renderExperience(); }
+
+    // Achievements
+    function renderAchievements() {
+      const arr = (siteData.about||{}).achievements || [];
+      document.getElementById('achievements-list').innerHTML = arr.map((a,i) =>
+        makeCard(a.title, a.year, `editAchievement(${i})`, `delAchievement(${i})`)
+      ).join('');
+    }
+    function addAchievement() { if(!siteData.about) siteData.about = {}; siteData.about.achievements = siteData.about.achievements || []; siteData.about.achievements.push({icon:'✦',title:'成就',year:'2025',desc:'描述'}); markDirty(); renderAchievements(); }
+    function editAchievement(i) { editObj(siteData.about.achievements[i], ['icon','title','year','desc'], ()=>renderAchievements()); }
+    function delAchievement(i) { siteData.about.achievements.splice(i,1); markDirty(); renderAchievements(); }
+
+    // Testimonials
+    function renderTestimonials() {
+      const arr = (siteData.about||{}).testimonials || [];
+      document.getElementById('testimonials-list').innerHTML = arr.map((t,i) =>
+        makeCard(t.author, t.quote.substring(0,40)+'...', `editTestimonial(${i})`, `delTestimonial(${i})`)
+      ).join('');
+    }
+    function addTestimonial() { if(!siteData.about) siteData.about = {}; siteData.about.testimonials = siteData.about.testimonials || []; siteData.about.testimonials.push({quote:'评价内容',author:'评价人',role:''}); markDirty(); renderTestimonials(); }
+    function editTestimonial(i) { editObj(siteData.about.testimonials[i], ['quote','author','role'], ()=>renderTestimonials()); }
+    function delTestimonial(i) { siteData.about.testimonials.splice(i,1); markDirty(); renderTestimonials(); }
+
+    // Socials
+    function renderSocials() {
+      document.getElementById('socials-list').innerHTML = (siteData.socials||[]).map((s,i) =>
+        makeCard(s.name, s.url, `editSocial(${i})`, `delSocial(${i})`)
+      ).join('');
+    }
+    function addSocial() { siteData.socials = siteData.socials || []; siteData.socials.push({name:'平台',url:'#',icon:'✦'}); markDirty(); renderSocials(); }
+    function editSocial(i) { editObj(siteData.socials[i], ['name','url','icon'], ()=>renderSocials()); }
+    function delSocial(i) { siteData.socials.splice(i,1); markDirty(); renderSocials(); }
+
+    // ── Generic Obj Editor ──
+    function editObj(obj, keys, cb) {
+      const fieldsHtml = keys.map(k => {
+        let val = obj[k] !== undefined ? obj[k] : '';
+        return `<div class="cms-field"><label>${k}</label><input id="eo-${k}" value="${escHtml(String(val))}" /></div>`;
+      }).join('');
+      const html = `<div>${fieldsHtml}</div><div style="margin-top:12px;display:flex;gap:8px"><button class="cms-btn" onclick="saveObjEdit('${keys.join(',')}',arguments[0])">保存</button><button class="cms-btn" style="background:#333" onclick="closeObjEdit()">取消</button></div>`;
+      document.getElementById('obj-editor-body').innerHTML = html;
+      document.getElementById('obj-editor-modal').classList.add('open');
+      window._objEditTarget = obj;
+      window._objEditKeys = keys;
+      window._objEditCb = cb;
+    }
+    function saveObjEdit() {
+      const obj = window._objEditTarget;
+      window._objEditKeys.forEach(k => { obj[k] = document.getElementById('eo-'+k).value; });
+      markDirty(); closeObjEdit();
+      if (window._objEditCb) window._objEditCb();
+    }
+    function closeObjEdit() { document.getElementById('obj-editor-modal').classList.remove('open'); }
+
+    // ── Serialize ──
+    function serializeSiteData(obj, indent = 0) {
+      const sp = '  '.repeat(indent), sp2 = '  '.repeat(indent+1);
+      if (obj === null) return 'null';
+      if (typeof obj === 'string') return "'" + obj.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\n/g,'\\n') + "'";
+      if (typeof obj === 'number' || typeof obj === 'boolean') return String(obj);
+      if (Array.isArray(obj)) {
+        if (obj.length === 0) return '[]';
+        if (obj.every(x => typeof x !== 'object' || x === null)) return '[' + obj.map(x => serializeSiteData(x,0)).join(', ') + ']';
+        return '[\n' + obj.map(x => sp2 + serializeSiteData(x, indent+1)).join(',\n') + '\n' + sp + ']';
+      }
+      if (typeof obj === 'object') {
+        const keys = Object.keys(obj);
+        if (keys.length === 0) return '{}';
+        const lines = keys.map(k => sp2 + k + ': ' + serializeSiteData(obj[k], indent+1));
+        return '{\n' + lines.join(',\n') + '\n' + sp + '}';
+      }
+      return String(obj);
     }
 
-    function closeEditor() {
-      document.getElementById('editor-modal').classList.remove('open')
-      currentEditField = null
+    function generateSiteDataJS() {
+      const body = serializeSiteData(siteData, 0);
+      return `/**\n * ═══════════════════════════════════════\n * ★ 站点内容数据 ★\n * 由管理后台生成\n * ═══════════════════════════════════════\n */\n\nexport const siteData = ${body};\n`;
     }
 
-    function saveEditor() {
-      const val = document.getElementById('editor-value').value
-      const field = currentEditField
-      if (!field) return
-
-      // Update display
-      document.querySelectorAll(`[data-field="${field}"]`).forEach(el => {
-        el.textContent = val
-        el.classList.add('edit-changed')
-      })
-
-      // Track change
-      const existing = editQueue.find(e => e.field === field)
-      if (existing) existing.value = val
-      else editQueue.push({ field, value: val })
-
-      document.getElementById('change-count').textContent = `${editQueue.length} 项修改`
-      closeEditor()
-    }
-
-    function resetChanges() {
-      editQueue = []
-      document.querySelectorAll('.edit-changed').forEach(el => el.classList.remove('edit-changed'))
-      document.getElementById('change-count').textContent = '0 项修改'
-      showToast('已重置')
-    }
-
-    // ── Save to GitHub ──
+    // ── Save ──
     async function saveAll() {
-      if (editQueue.length === 0) { showToast('没有修改需要保存', 'error'); return }
-      showToast('正在保存到 GitHub...')
+      // Collect basic fields
+      ['name','nameEn','title','tagline','email','adminPassword','footer'].forEach(k => {
+        siteData[k] = document.getElementById('f-'+k).value;
+      });
+      siteData.featuredWorkIds = document.getElementById('f-featuredWorkIds').value.split(',').map(s=>s.trim()).filter(Boolean);
+      if(!siteData.about) siteData.about = {};
+      ['bio1','bio2','bio3'].forEach(k => { siteData.about[k] = document.getElementById('f-'+k).value; });
 
-      let newContent = fileContent
-      for (const { field, value } of editQueue) {
-        const escaped = value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-        const re = new RegExp(`(${field}['"]?\\s*[:=]\\s*['"])[^'"]+(['"])`)
-        newContent = newContent.replace(re, `$1${escaped}$2`)
-      }
-
-      const msg = `feat: 管理后台更新 — ${editQueue.map(e => e.field).join(', ')}`
-      const ok = await ghPut(FILE_PATH, newContent, msg)
-      if (ok) {
-        fileContent = newContent
-        editQueue = []
-        document.getElementById('change-count').textContent = '0 项修改'
-        document.querySelectorAll('.edit-changed').forEach(el => el.classList.remove('edit-changed'))
-        showToast('✅ 保存成功！网站正在重新部署', 'success')
+      const js = generateSiteDataJS();
+      const msg = 'feat: 管理后台更新全站内容';
+      const result = await ghPut(DATA_PATH, js, msg, dataSha);
+      if (result) {
+        dataSha = result.content.sha;
+        dirty = false;
+        document.getElementById('dirty-count').textContent = '0';
+        toast('✅ 保存成功！GitHub Action 正在自动部署，1-2 分钟后生效', 'success');
       } else {
-        showToast('❌ 保存失败，请检查 Token 权限', 'error')
+        toast('❌ 保存失败', 'error');
       }
     }
+
+    function markDirty() { dirty = true; document.getElementById('dirty-count').textContent = '●'; }
+
+    // ── File Upload ──
+    let pendingFiles = [];
+    function previewFiles() {
+      const input = document.getElementById('file-input');
+      pendingFiles = Array.from(input.files);
+      document.getElementById('file-preview').innerHTML = pendingFiles.map(f => {
+        const url = URL.createObjectURL(f);
+        const isVideo = f.type.startsWith('video/');
+        return `<div class="file-preview-item">${isVideo ? `<video src="${url}" controls></video>` : `<img src="${url}" />`}<div class="name">${f.name}</div></div>`;
+      }).join('');
+    }
+    async function uploadFiles() {
+      if (pendingFiles.length === 0) { toast('请先选择文件', 'error'); return; }
+      toast('正在上传 '+pendingFiles.length+' 个文件...');
+      let ok = 0;
+      for (const f of pendingFiles) {
+        const base64 = await new Promise(resolve => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result.split(',')[1]);
+          reader.readAsDataURL(f);
+        });
+        const path = IMG_DIR + Date.now() + '_' + f.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+        const result = await ghPut(path, base64, 'upload: '+f.name);
+        if (result) ok++; else toast('上传失败: '+f.name, 'error');
+      }
+      if (ok > 0) { toast('✅ 成功上传 '+ok+' 个文件！路径: images/xxx', 'success'); pendingFiles = []; document.getElementById('file-preview').innerHTML = ''; document.getElementById('file-input').value = ''; loadFileList(); }
+    }
+    async function loadFileList() {
+      const files = await ghListDir(IMG_DIR);
+      if (!Array.isArray(files)) return;
+      document.getElementById('existing-files').innerHTML = '<div class="file-grid">' + files.filter(f => f.type === 'file').map(f => {
+        const url = f.download_url;
+        const isVideo = f.name.match(/\.(mp4|webm|mov)$/i);
+        return `<div class="file-item">${isVideo ? `<video src="${url}"></video>` : `<img src="${url}" loading="lazy" />`}<div class="fn" title="点击复制路径" onclick="copyPath('images/${f.name}')">images/${f.name}</div></div>`;
+      }).join('') + '</div>';
+    }
+    function copyPath(path) {
+      navigator.clipboard.writeText(path).then(() => toast('已复制: '+path));
+    }
+
+    // ── Tab Switch ──
+    document.addEventListener('click', e => {
+      if (e.target.classList.contains('cms-tab')) {
+        document.querySelectorAll('.cms-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.cms-panel').forEach(p => p.classList.remove('active'));
+        e.target.classList.add('active');
+        document.getElementById('panel-'+e.target.dataset.tab).classList.add('active');
+      }
+    });
 
     // ── Toast ──
-    function showToast(msg, type = '') {
-      const el = document.getElementById('admin-toast')
-      el.textContent = msg
-      el.className = 'admin-toast ' + type
-      el.classList.add('show')
-      setTimeout(() => el.classList.remove('show'), 3000)
+    function toast(msg, type='') {
+      const el = document.getElementById('admin-toast');
+      el.textContent = msg; el.className = 'admin-toast '+type; el.classList.add('show');
+      setTimeout(() => el.classList.remove('show'), 4000);
     }
+
+    function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 
     // ── Init ──
     document.getElementById('admin-entry').addEventListener('click', () => {
-      document.getElementById('login-modal').classList.add('open')
-    })
-
-    document.getElementById('login-modal').addEventListener('click', (e) => {
-      if (e.target === e.currentTarget) e.currentTarget.classList.remove('open')
-    })
-
-    document.getElementById('editor-modal').addEventListener('click', (e) => {
-      if (e.target === e.currentTarget) closeEditor()
-    })
+      document.getElementById('login-modal').classList.add('open');
+    });
+    document.getElementById('login-modal').addEventListener('click', e => {
+      if (e.target === e.currentTarget) e.currentTarget.classList.remove('open');
+    });
+    document.getElementById('work-modal').addEventListener('click', e => {
+      if (e.target === e.currentTarget) closeWorkModal();
+    });
   </script>
+
+  <!-- ====== Object Editor Modal ====== -->
+  <div class="admin-modal-overlay" id="obj-editor-modal">
+    <div class="admin-modal" style="max-width:500px">
+      <h3>编辑</h3>
+      <div id="obj-editor-body"></div>
+    </div>
+  </div>
+
 </body>
 </html>
