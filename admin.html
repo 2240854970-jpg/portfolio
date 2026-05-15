@@ -7,532 +7,668 @@
   <link rel="stylesheet" crossorigin href="/assets/admin-Wgw2DwaS.css">
   <link rel="stylesheet" crossorigin href="/assets/style-7sLpRoMq.css">
 </head>
-<body>
+<body style="background:#08080c;color:#ddd;font-family:'Noto Sans SC',sans-serif;margin:0">
 
-  <!-- ====== Admin Entry Button ====== -->
-  <button class="admin-enter-btn" id="admin-entry" title="管理后台">✦</button>
+<!-- ====== Login ====== -->
+<div class="admin-modal-overlay" id="login-modal" style="display:flex">
+  <div class="admin-modal">
+    <h2>✦ 管理后台</h2>
+    <p>登录后可视化编辑全站内容</p>
+    <div class="form-group"><label>管理密码</label><input type="password" id="admin-pwd" placeholder="请输入密码" /></div>
+    <div class="form-group"><label>GitHub Token</label><input type="password" id="admin-token" placeholder="ghp_..." /></div>
+    <button class="btn" onclick="adminLogin()">登录</button>
+    <div class="admin-error" id="admin-error">密码错误，请重试</div>
+  </div>
+</div>
 
-  <!-- ====== Login Modal ====== -->
-  <div class="admin-modal-overlay" id="login-modal">
-    <div class="admin-modal">
-      <h2>✦ 管理后台</h2>
-      <p>登录后可编辑全站内容</p>
-      <div class="form-group">
-        <label>管理密码</label>
-        <input type="password" id="admin-pwd" placeholder="请输入密码" />
-      </div>
-      <div class="form-group">
-        <label>GitHub Token</label>
-        <input type="password" id="admin-token" placeholder="ghp_..." />
-      </div>
-      <button class="btn" onclick="adminLogin()">登录</button>
-      <div class="admin-error" id="admin-error">密码错误，请重试</div>
-    </div>
+<!-- ====== Main CMS ====== -->
+<div id="cms-root" style="display:none">
+
+  <!-- Top Bar -->
+  <div id="cms-topbar">
+    <span class="cms-logo">✦ 管理后台</span>
+    <span id="dirty-badge" style="color:#888;font-size:13px">无修改</span>
+    <button onclick="saveAll()" class="cms-save-btn">💾 保存并部署</button>
   </div>
 
-  <!-- ====== Main CMS UI ====== -->
-  <div id="cms-panel" style="display:none">
-    <!-- Tab Nav -->
-    <div class="cms-tabs">
-      <button class="cms-tab active" data-tab="basic">基本信息</button>
-      <button class="cms-tab" data-tab="home">首页模块</button>
-      <button class="cms-tab" data-tab="works">作品管理</button>
-      <button class="cms-tab" data-tab="about">关于我</button>
-      <button class="cms-tab" data-tab="contact">联系方式</button>
+  <!-- Main Layout -->
+  <div id="cms-main">
+    <!-- Left Tabs -->
+    <div id="cms-sidebar">
+      <button class="cms-tab active" data-tab="home">🏠 首页</button>
+      <button class="cms-tab" data-tab="works">🖼 作品管理</button>
+      <button class="cms-tab" data-tab="about">👤 关于我</button>
+      <button class="cms-tab" data-tab="contact">📧 联系方式</button>
       <button class="cms-tab" data-tab="files">📁 文件上传</button>
     </div>
 
-    <!-- Tab Panels -->
-    <div class="cms-panels">
-      <!-- Basic Info -->
-      <div class="cms-panel active" id="panel-basic">
-        <div class="cms-field"><label>姓名</label><input id="f-name" /></div>
-        <div class="cms-field"><label>英文名</label><input id="f-nameEn" /></div>
-        <div class="cms-field"><label>职位</label><input id="f-title" /></div>
-        <div class="cms-field"><label>一句话介绍</label><input id="f-tagline" /></div>
-        <div class="cms-field"><label>邮箱</label><input id="f-email" /></div>
-        <div class="cms-field"><label>管理密码</label><input id="f-adminPassword" /></div>
-        <div class="cms-field"><label>页脚文字</label><input id="f-footer" /></div>
-      </div>
-
-      <!-- Home -->
-      <div class="cms-panel" id="panel-home">
-        <h3>数据条 (Stats)</h3>
-        <div id="stats-list"></div>
-        <button class="cms-btn-sm" onclick="addStat()">+ 添加</button>
-
-        <h3>首页精选作品</h3>
-        <div class="cms-field"><label>精选作品 ID（逗号分隔）</label><textarea id="f-featuredWorkIds" rows="2"></textarea></div>
-
-        <h3>核心价值 (Highlights)</h3>
-        <div id="highlights-list"></div>
-        <button class="cms-btn-sm" onclick="addHighlight()">+ 添加</button>
-      </div>
-
-      <!-- Works -->
-      <div class="cms-panel" id="panel-works">
-        <div id="works-list"></div>
-        <button class="cms-btn" onclick="addWork()">+ 新建作品</button>
-      </div>
-
-      <!-- About -->
-      <div class="cms-panel" id="panel-about">
-        <h3>个人简介</h3>
-        <div class="cms-field"><label>简介 1</label><textarea id="f-bio1" rows="3"></textarea></div>
-        <div class="cms-field"><label>简介 2</label><textarea id="f-bio2" rows="3"></textarea></div>
-        <div class="cms-field"><label>简介 3</label><textarea id="f-bio3" rows="3"></textarea></div>
-
-        <h3>技能</h3>
-        <div id="skills-list"></div>
-        <button class="cms-btn-sm" onclick="addSkill()">+ 添加</button>
-
-        <h3>工作经历</h3>
-        <div id="experience-list"></div>
-        <button class="cms-btn-sm" onclick="addExperience()">+ 添加</button>
-
-        <h3>成就</h3>
-        <div id="achievements-list"></div>
-        <button class="cms-btn-sm" onclick="addAchievement()">+ 添加</button>
-
-        <h3>评价</h3>
-        <div id="testimonials-list"></div>
-        <button class="cms-btn-sm" onclick="addTestimonial()">+ 添加</button>
-      </div>
-
-      <!-- Contact -->
-      <div class="cms-panel" id="panel-contact">
-        <h3>社交链接</h3>
-        <div id="socials-list"></div>
-        <button class="cms-btn-sm" onclick="addSocial()">+ 添加</button>
-      </div>
-
-      <!-- Files -->
-      <div class="cms-panel" id="panel-files">
-        <h3>上传文件</h3>
-        <div class="cms-field">
-          <label>选择图片或视频</label>
-          <input type="file" id="file-input" accept="image/*,video/*" multiple onchange="previewFiles()" />
+    <!-- Right Preview -->
+    <div id="cms-preview">
+      <!-- Home Tab -->
+      <div class="cms-panel active" id="panel-home">
+        <!-- Hero -->
+        <div id="preview-hero" class="preview-section">
+          <div class="preview-hero-inner">
+            <h1 class="editable" data-path="name" style="font-size:48px;margin:0 0 4px;font-weight:700;letter-spacing:0.04em" id="pv-name">—</h1>
+            <p class="editable" data-path="title" style="font-size:22px;margin:0 0 8px;color:#c084fc" id="pv-title">—</p>
+            <p class="editable" data-path="tagline" style="font-size:15px;margin:0;color:#888" id="pv-tagline">—</p>
+          </div>
         </div>
-        <div id="file-preview"></div>
-        <button class="cms-btn" onclick="uploadFiles()">📤 上传到服务器</button>
-        <button class="cms-btn" style="background:#333" onclick="loadFileList()">🔄 刷新已有文件</button>
 
-        <h3>已有文件</h3>
-        <div id="existing-files"></div>
+        <!-- Stats -->
+        <div class="preview-section">
+          <h2 class="section-label">📊 首页数据条</h2>
+          <div id="preview-stats" class="stats-row"></div>
+          <button class="add-btn" onclick="addItem('stats')">+ 添加数据条</button>
+        </div>
+
+        <!-- Highlights -->
+        <div class="preview-section">
+          <h2 class="section-label">✦ 核心价值</h2>
+          <div id="preview-highlights" class="card-grid"></div>
+          <button class="add-btn" onclick="addItem('highlights')">+ 添加</button>
+        </div>
+
+        <!-- Featured Works -->
+        <div class="preview-section">
+          <h2 class="section-label">📌 首页精选作品</h2>
+          <div class="editable" data-path="featuredWorkIds" style="padding:8px 12px;background:#111;border-radius:6px;font-size:13px;color:#888;cursor:pointer" id="pv-featured">点击编辑精选作品 ID</div>
+        </div>
+
+        <!-- Footer -->
+        <div class="preview-section">
+          <h2 class="section-label">📄 页脚</h2>
+          <div class="editable" data-path="footer" style="padding:8px 12px;background:#111;border-radius:6px;font-size:13px;color:#888;cursor:pointer" id="pv-footer">—</div>
+        </div>
+      </div>
+
+      <!-- Works Tab -->
+      <div class="cms-panel" id="panel-works">
+        <div id="preview-works"></div>
+        <button class="add-btn" onclick="addItem('works')" style="margin-top:16px">+ 新建作品</button>
+      </div>
+
+      <!-- About Tab -->
+      <div class="cms-panel" id="panel-about">
+        <div class="preview-section">
+          <h2 class="section-label">📝 个人简介</h2>
+          <div class="editable" data-path="about.bio1" style="padding:12px;background:#111;border-radius:6px;margin-bottom:8px;cursor:pointer;font-size:14px;line-height:1.7" id="pv-bio1">—</div>
+          <div class="editable" data-path="about.bio2" style="padding:12px;background:#111;border-radius:6px;margin-bottom:8px;cursor:pointer;font-size:14px;line-height:1.7" id="pv-bio2">—</div>
+          <div class="editable" data-path="about.bio3" style="padding:12px;background:#111;border-radius:6px;cursor:pointer;font-size:14px;line-height:1.7" id="pv-bio3">—</div>
+        </div>
+        <div class="preview-section">
+          <h2 class="section-label">🛠 技能</h2>
+          <div id="preview-skills"></div>
+          <button class="add-btn" onclick="addItem('about.skills')">+ 添加技能</button>
+        </div>
+        <div class="preview-section">
+          <h2 class="section-label">💼 工作经历</h2>
+          <div id="preview-experience"></div>
+          <button class="add-btn" onclick="addItem('about.experience')">+ 添加</button>
+        </div>
+        <div class="preview-section">
+          <h2 class="section-label">🏆 成就</h2>
+          <div id="preview-achievements"></div>
+          <button class="add-btn" onclick="addItem('about.achievements')">+ 添加</button>
+        </div>
+        <div class="preview-section">
+          <h2 class="section-label">💬 评价</h2>
+          <div id="preview-testimonials"></div>
+          <button class="add-btn" onclick="addItem('about.testimonials')">+ 添加</button>
+        </div>
+      </div>
+
+      <!-- Contact Tab -->
+      <div class="cms-panel" id="panel-contact">
+        <div class="preview-section">
+          <h2 class="section-label">📧 邮箱</h2>
+          <div class="editable" data-path="email" style="font-size:20px;padding:12px;background:#111;border-radius:6px;cursor:pointer;color:#c084fc" id="pv-email">—</div>
+        </div>
+        <div class="preview-section">
+          <h2 class="section-label">🔗 社交链接</h2>
+          <div id="preview-socials"></div>
+          <button class="add-btn" onclick="addItem('socials')">+ 添加</button>
+        </div>
+        <div class="preview-section">
+          <h2 class="section-label">🔑 管理密码</h2>
+          <div class="editable" data-path="adminPassword" style="padding:12px;background:#111;border-radius:6px;cursor:pointer;font-size:14px;color:#888" id="pv-password">—</div>
+        </div>
+      </div>
+
+      <!-- Files Tab -->
+      <div class="cms-panel" id="panel-files">
+        <div class="preview-section">
+          <h2 class="section-label">📤 上传文件</h2>
+          <input type="file" id="file-input" accept="image/*,video/*" multiple onchange="previewFiles()" style="color:#888;margin-bottom:8px" />
+          <div id="file-preview" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px"></div>
+          <button class="add-btn" onclick="uploadFiles()">📤 开始上传</button>
+        </div>
+        <div class="preview-section">
+          <h2 class="section-label">📂 已有文件（点击复制路径）</h2>
+          <button class="add-btn" onclick="loadFileList()" style="margin-bottom:12px">🔄 刷新列表</button>
+          <div id="existing-files" class="file-grid"></div>
+        </div>
       </div>
     </div>
+  </div>
+</div>
 
-    <!-- Toolbar -->
-    <div class="cms-toolbar">
-      <span>已修改 <b id="dirty-count">0</b> 项</span>
-      <button class="cms-btn cms-btn-save" onclick="saveAll()">💾 保存并部署</button>
+<!-- ====== Edit Modal ====== -->
+<div class="admin-modal-overlay" id="edit-modal">
+  <div class="admin-modal" style="max-width:600px;max-height:80vh;overflow-y:auto">
+    <h3 id="edit-title">编辑</h3>
+    <div id="edit-body"></div>
+    <div style="margin-top:16px;display:flex;gap:8px">
+      <button class="btn" onclick="saveEdit()">保存</button>
+      <button class="btn" style="background:#333" onclick="closeEdit()">取消</button>
     </div>
   </div>
+</div>
 
-  <!-- ====== Work Editor Modal ====== -->
-  <div class="admin-modal-overlay" id="work-modal">
-    <div class="admin-modal" style="max-width:700px;max-height:85vh;overflow-y:auto">
-      <h3 id="work-modal-title">编辑作品</h3>
-      <div id="work-modal-body"></div>
-      <div style="margin-top:16px;display:flex;gap:8px">
-        <button class="btn" onclick="saveWork()">保存</button>
-        <button class="btn" style="background:#333" onclick="closeWorkModal()">取消</button>
+<!-- ====== Toast ====== -->
+<div class="admin-toast" id="admin-toast"></div>
+
+<style>
+  /* CMS Layout */
+  #cms-topbar { position:sticky; top:0; z-index:200; display:flex; align-items:center; justify-content:space-between; padding:12px 20px; background:#0a0a0f; border-bottom:1px solid #1a1a2a; }
+  .cms-logo { font-size:16px; font-weight:700; color:#c084fc; }
+  .cms-save-btn { padding:8px 20px; border:none; border-radius:8px; background:#22c55e; color:#000; font-weight:700; font-size:14px; cursor:pointer; }
+  .cms-save-btn:hover { opacity:.85; }
+  #cms-main { display:flex; min-height:calc(100vh - 53px); }
+  #cms-sidebar { width:180px; background:#0a0a0f; border-right:1px solid #1a1a2a; padding:12px 0; flex-shrink:0; }
+  .cms-tab { display:block; width:100%; padding:10px 16px; border:none; background:transparent; color:#888; text-align:left; font-size:14px; cursor:pointer; transition:all .2s; }
+  .cms-tab:hover { color:#ddd; background:#111; }
+  .cms-tab.active { color:#c084fc; background:#14141f; border-left:2px solid #c084fc; }
+  #cms-preview { flex:1; padding:24px; overflow-y:auto; max-height:calc(100vh - 53px); }
+  .cms-panel { display:none; }
+  .cms-panel.active { display:block; }
+  .preview-section { margin-bottom:32px; }
+  .section-label { font-size:13px; color:#666; margin:0 0 12px; font-weight:400; text-transform:uppercase; letter-spacing:.08em; }
+  .preview-hero-inner { padding:48px 24px; background:linear-gradient(135deg,#0d0d1a,#1a0d2a); border-radius:12px; text-align:center; }
+  .stats-row { display:flex; flex-wrap:wrap; gap:12px; }
+  .stat-card { flex:1; min-width:120px; padding:16px 12px; background:#111; border-radius:10px; border:1px solid #1a1a2a; text-align:center; position:relative; }
+  .stat-card .val { font-size:28px; font-weight:700; color:#c084fc; }
+  .stat-card .lbl { font-size:12px; color:#888; margin-top:4px; }
+  .stat-card .icon { font-size:18px; margin-bottom:4px; }
+  .stat-card .del { position:absolute; top:4px; right:8px; font-size:14px; color:#ef4444; cursor:pointer; opacity:.5; }
+  .stat-card .del:hover { opacity:1; }
+  .card-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:12px; }
+  .hl-card { padding:16px; background:#111; border-radius:10px; border:1px solid #1a1a2a; position:relative; }
+  .hl-card .icon { font-size:20px; margin-bottom:8px; }
+  .hl-card .title { font-weight:600; font-size:14px; color:#ddd; margin-bottom:6px; }
+  .hl-card .desc { font-size:12px; color:#888; line-height:1.5; }
+  .hl-card .del { position:absolute; top:6px; right:10px; color:#ef4444; cursor:pointer; opacity:.5; font-size:14px; }
+  .hl-card .del:hover { opacity:1; }
+  .work-card { display:flex; gap:12px; padding:12px; background:#111; border-radius:10px; border:1px solid #1a1a2a; margin-bottom:8px; align-items:center; }
+  .work-card img { width:60px; height:60px; object-fit:cover; border-radius:6px; }
+  .work-card .info { flex:1; }
+  .work-card .wtitle { font-weight:600; font-size:14px; color:#ddd; }
+  .work-card .wmeta { font-size:12px; color:#888; }
+  .work-card .wactions { display:flex; gap:6px; }
+  .work-card .wactions button { padding:4px 10px; border:1px solid #333; border-radius:4px; background:transparent; color:#888; cursor:pointer; font-size:11px; }
+  .work-card .wactions button:hover { border-color:#c084fc; color:#c084fc; }
+  .work-card .wactions .del-btn:hover { border-color:#ef4444; color:#ef4444; }
+  .skill-bar { margin-bottom:12px; }
+  .skill-bar .sname { font-size:13px; color:#ddd; margin-bottom:4px; display:flex; justify-content:space-between; }
+  .skill-bar .sbar { height:6px; background:#1a1a2a; border-radius:3px; overflow:hidden; }
+  .skill-bar .sfill { height:100%; background:#c084fc; border-radius:3px; }
+  .exp-card, .ach-card, .test-card { padding:12px; background:#111; border-radius:8px; border:1px solid #1a1a2a; margin-bottom:8px; position:relative; }
+  .exp-card .del, .ach-card .del, .test-card .del { position:absolute; top:6px; right:10px; color:#ef4444; cursor:pointer; opacity:.5; font-size:14px; }
+  .exp-card .del:hover, .ach-card .del:hover, .test-card .del:hover { opacity:1; }
+  .social-card { display:flex; align-items:center; gap:12px; padding:10px 12px; background:#111; border-radius:8px; border:1px solid #1a1a2a; margin-bottom:6px; }
+  .social-card .sicon { font-size:18px; }
+  .social-card .sname { font-size:14px; color:#ddd; flex:1; }
+  .social-card .surl { font-size:12px; color:#888; }
+  .social-card .del { color:#ef4444; cursor:pointer; opacity:.5; }
+  .social-card .del:hover { opacity:1; }
+  .add-btn { padding:6px 14px; border:1px dashed #333; border-radius:6px; background:transparent; color:#888; cursor:pointer; font-size:12px; margin-top:8px; }
+  .add-btn:hover { border-color:#c084fc; color:#c084fc; }
+  .editable { cursor:pointer; transition:all .15s; position:relative; }
+  .editable:hover { outline:1px dashed #c084fc44; border-radius:4px; }
+  .editable::after { content:'✎'; position:absolute; right:-20px; top:50%; transform:translateY(-50%); font-size:11px; color:#c084fc88; opacity:0; transition:opacity .15s; }
+  .editable:hover::after { opacity:1; }
+  .file-grid { display:flex; flex-wrap:wrap; gap:8px; }
+  .file-item { text-align:center; }
+  .file-item img, .file-item video { width:100px; height:100px; object-fit:cover; border-radius:6px; border:1px solid #333; }
+  .file-item .fn { font-size:11px; color:#888; margin-top:4px; max-width:100px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; cursor:pointer; }
+  .file-item .fn:hover { color:#c084fc; text-decoration:underline; }
+  .file-preview-item { position:relative; }
+  .file-preview-item img, .file-preview-item video { width:80px; height:80px; object-fit:cover; border-radius:4px; border:1px solid #333; }
+  .file-preview-item .name { font-size:10px; color:#888; max-width:80px; overflow:hidden; text-overflow:ellipsis; }
+  .edit-field { margin-bottom:14px; }
+  .edit-field label { display:block; font-size:12px; color:#888; margin-bottom:4px; }
+  .edit-field input, .edit-field textarea, .edit-field select {
+    width:100%; padding:8px 12px; border-radius:6px; border:1px solid #333; background:#1a1a1a; color:#ddd; font-size:13px; box-sizing:border-box;
+  }
+  .edit-field textarea { resize:vertical; }
+  /* Make object editor modal click-outside to close */
+  #edit-modal { display:none; }
+  #edit-modal.open { display:flex; }
+</style>
+
+<script>
+const OWNER='2240854970-jpg', REPO='portfolio', DATA_PATH='src/data/site-data.js', IMG_DIR='public/images/', BRANCH='main';
+let siteData=null, dataSha='', gitToken='', dirty=false, editTarget=null, editCb=null;
+
+// ── GitHub API ──
+async function ghGet(path){
+  const r=await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`,{
+    headers:{'Authorization':`Bearer ${gitToken}`,'Accept':'application/vnd.github+json'}
+  });
+  return r.ok?await r.json():null;
+}
+async function ghPut(path,content,msg,sha){
+  const b64=btoa(unescape(encodeURIComponent(content)));
+  const body={message:msg,content:b64,branch:BRANCH};
+  if(sha) body.sha=sha;
+  const r=await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`,{
+    method:'PUT',
+    headers:{'Authorization':`Bearer ${gitToken}`,'Accept':'application/vnd.github+json','Content-Type':'application/json'},
+    body:JSON.stringify(body)
+  });
+  return r.ok?await r.json():null;
+}
+async function ghListDir(path){
+  const r=await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`,{
+    headers:{'Authorization':`Bearer ${gitToken}`,'Accept':'application/vnd.github+json'}
+  });
+  return r.ok?await r.json():[];
+}
+function d64(b64){try{return decodeURIComponent(escape(atob(b64)));}catch{return atob(b64);}}
+
+// ── Parse siteData ──
+function parseData(raw){
+  const m=raw.match(/export const siteData\s*=\s*({[\s\S]*?})\n\s*(?:export|$)/);
+  if(!m) return null;
+  try{return new Function('return '+m[1])();}catch(e){return null;}
+}
+
+// ── Get nested value by path like "about.bio1" ──
+function getByPath(obj,path){
+  return path.split('.').reduce((o,k)=>o?.[k],obj);
+}
+function setByPath(obj,path,val){
+  const keys=path.split('.');
+  let o=obj;
+  for(let i=0;i<keys.length-1;i++){
+    if(!o[keys[i]]) o[keys[i]]={};
+    o=o[keys[i]];
+  }
+  o[keys[keys.length-1]]=val;
+}
+
+// ── Login ──
+async function adminLogin(){
+  gitToken=document.getElementById('admin-token').value;
+  const pwd=document.getElementById('admin-pwd').value;
+  const resp=await ghGet(DATA_PATH);
+  if(!resp){toast('无法连接 GitHub','error');return;}
+  const raw=d64(resp.content); dataSha=resp.sha;
+  const sd=parseData(raw);
+  if(!sd||sd.adminPassword!==pwd){document.getElementById('admin-error').style.display='block';return;}
+  siteData=sd;
+  document.getElementById('login-modal').style.display='none';
+  document.getElementById('cms-root').style.display='block';
+  renderAll();
+}
+
+// ── Render All ──
+function renderAll(){
+  const d=siteData;
+  // Home
+  document.getElementById('pv-name').textContent=d.name||'—';
+  document.getElementById('pv-title').textContent=d.title||'—';
+  document.getElementById('pv-tagline').textContent=d.tagline||'—';
+  document.getElementById('pv-featured').textContent=(d.featuredWorkIds||[]).join(', ')||'点击编辑';
+  document.getElementById('pv-footer').textContent=d.footer||'—';
+  renderStats();
+  renderHighlights();
+  renderWorks();
+  // About
+  document.getElementById('pv-bio1').textContent=(d.about||{}).bio1||'—';
+  document.getElementById('pv-bio2').textContent=(d.about||{}).bio2||'—';
+  document.getElementById('pv-bio3').textContent=(d.about||{}).bio3||'—';
+  renderSkills();
+  renderExperience();
+  renderAchievements();
+  renderTestimonials();
+  // Contact
+  document.getElementById('pv-email').textContent=d.email||'—';
+  document.getElementById('pv-password').textContent=d.adminPassword||'—';
+  renderSocials();
+}
+
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+
+// ── Stats ──
+function renderStats(){
+  const arr=siteData.stats||[];
+  document.getElementById('preview-stats').innerHTML=arr.map((s,i)=>`
+    <div class="stat-card">
+      <span class="del" onclick="delArr('stats',${i})">✕</span>
+      <div class="icon">${esc(s.icon)}</div>
+      <div class="val editable" onclick="editArrItem('stats',${i},['value','label','icon'])">${esc(s.value)}</div>
+      <div class="lbl editable" onclick="editArrItem('stats',${i},['value','label','icon'])">${esc(s.label)}</div>
+    </div>`).join('');
+}
+// ── Highlights ──
+function renderHighlights(){
+  const arr=siteData.highlights||[];
+  document.getElementById('preview-highlights').innerHTML=arr.map((h,i)=>`
+    <div class="hl-card">
+      <span class="del" onclick="delArr('highlights',${i})">✕</span>
+      <div class="icon editable" onclick="editArrItem('highlights',${i},['icon','label','desc'])">${esc(h.icon)}</div>
+      <div class="title editable" onclick="editArrItem('highlights',${i},['icon','label','desc'])">${esc(h.label)}</div>
+      <div class="desc editable" onclick="editArrItem('highlights',${i},['icon','label','desc'])">${esc(h.desc)}</div>
+    </div>`).join('');
+}
+
+// ── Works ──
+function renderWorks(){
+  const arr=siteData.works||[];
+  document.getElementById('preview-works').innerHTML=arr.map((w,i)=>`
+    <div class="work-card">
+      ${w.thumbnail?`<img src="${esc(w.thumbnail)}" onerror="this.style.display='none'" />`:`<div style="width:60px;height:60px;background:#1a1a2a;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#444">🖼</div>`}
+      <div class="info">
+        <div class="wtitle">${esc(w.title)} <span style="font-size:11px;color:#${w.type==='video'?'f59e0b':'888'}">[${esc(w.type||'image')}]</span></div>
+        <div class="wmeta">${esc(w.category||'')} · ${esc(w.date||'')} | 图片:${(w.images||[]).length}张</div>
       </div>
-    </div>
-  </div>
+      <div class="wactions">
+        <button onclick="editWork(${i})">✎ 编辑</button>
+        <button class="del-btn" onclick="delArr('works',${i})">✕</button>
+      </div>
+    </div>`).join('');
+}
 
-  <!-- ====== Toast ====== -->
-  <div class="admin-toast" id="admin-toast"></div>
+// ── Skills ──
+function renderSkills(){
+  const arr=(siteData.about||{}).skills||[];
+  document.getElementById('preview-skills').innerHTML=arr.map((s,i)=>`
+    <div class="skill-bar">
+      <div class="sname"><span>${esc(s.name)}</span><span>${Math.round((s.level||0)*100)}%</span></div>
+      <div class="sbar"><div class="sfill" style="width:${Math.round((s.level||0)*100)}%"></div></div>
+      <div style="margin-top:2px"><button style="background:none;border:none;color:#888;cursor:pointer;font-size:10px" onclick="editArrItem('about.skills',${i},['name','level'])">✎ 编辑</button> <button style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:10px" onclick="delArr('about.skills',${i})">✕</button></div>
+    </div>`).join('');
+}
 
-  <style>
-    .cms-tabs { display:flex; flex-wrap:wrap; gap:4px; padding:16px 16px 0; background:#0a0a0a; position:sticky; top:0; z-index:100; }
-    .cms-tab { padding:8px 14px; border:none; border-radius:6px 6px 0 0; background:transparent; color:#888; cursor:pointer; font-size:13px; }
-    .cms-tab.active { background:#141414; color:#c084fc; }
-    .cms-tab:hover { color:#ccc; }
-    .cms-panels { padding:16px; background:#141414; min-height:60vh; }
-    .cms-panel { display:none; }
-    .cms-panel.active { display:block; }
-    .cms-panel h3 { color:#c084fc; font-size:15px; margin:20px 0 10px; border-bottom:1px solid #222; padding-bottom:6px; }
-    .cms-panel h3:first-child { margin-top:0; }
-    .cms-field { margin-bottom:12px; }
-    .cms-field label { display:block; font-size:12px; color:#888; margin-bottom:4px; }
-    .cms-field input, .cms-field textarea, .cms-field select {
-      width:100%; padding:8px 12px; border-radius:6px; border:1px solid #333;
-      background:#1a1a1a; color:#ddd; font-size:13px; box-sizing:border-box;
-    }
-    .cms-field textarea { resize:vertical; }
-    .cms-btn { padding:10px 20px; border:none; border-radius:8px; background:#c084fc; color:#000; font-weight:600; cursor:pointer; font-size:14px; margin-top:8px; }
-    .cms-btn-sm { padding:4px 12px; border:1px solid #444; border-radius:6px; background:transparent; color:#888; cursor:pointer; font-size:12px; margin-top:4px; }
-    .cms-btn-sm:hover { border-color:#c084fc; color:#c084fc; }
-    .cms-btn-save { background:#22c55e; color:#000; }
-    .cms-toolbar { position:sticky; bottom:0; padding:12px 16px; background:#0a0a0a; border-top:1px solid #222; display:flex; justify-content:space-between; align-items:center; font-size:13px; color:#888; }
-    .cms-card { background:#1a1a1a; border:1px solid #222; border-radius:8px; padding:12px; margin-bottom:8px; }
-    .cms-card-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
-    .cms-card-title { font-weight:600; color:#ddd; font-size:14px; }
-    .cms-card-actions { display:flex; gap:6px; }
-    .cms-card-actions button { padding:3px 10px; border:1px solid #444; border-radius:4px; background:transparent; color:#888; cursor:pointer; font-size:11px; }
-    .cms-card-actions button:hover { border-color:#c084fc; color:#c084fc; }
-    .cms-card-actions button.danger:hover { border-color:#ef4444; color:#ef4444; }
-    .cms-card-desc { font-size:12px; color:#666; }
-    .file-preview-item { display:inline-block; margin:4px; position:relative; }
-    .file-preview-item img, .file-preview-item video { width:100px; height:100px; object-fit:cover; border-radius:4px; border:1px solid #333; }
-    .file-preview-item .name { font-size:10px; color:#888; text-align:center; max-width:100px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-    .file-grid { display:flex; flex-wrap:wrap; gap:8px; }
-    .file-item { text-align:center; }
-    .file-item img, .file-item video { width:120px; height:120px; object-fit:cover; border-radius:6px; border:1px solid #333; }
-    .file-item .fn { font-size:11px; color:#888; margin-top:2px; max-width:120px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; cursor:pointer; }
-    .file-item .fn:hover { color:#c084fc; }
-  </style>
+// ── Experience ──
+function renderExperience(){
+  const arr=(siteData.about||{}).experience||[];
+  document.getElementById('preview-experience').innerHTML=arr.map((e,i)=>`
+    <div class="exp-card">
+      <span class="del" onclick="delArr('about.experience',${i})">✕</span>
+      <div style="font-size:12px;color:#c084fc;margin-bottom:4px">${esc(e.period)}</div>
+      <div style="font-weight:600;font-size:14px;color:#ddd">${esc(e.role)} · ${esc(e.company)}</div>
+      <div style="font-size:12px;color:#888;margin-top:4px;line-height:1.5">${esc(e.desc||'')}</div>
+      <button style="background:none;border:none;color:#888;cursor:pointer;font-size:10px;margin-top:4px" onclick="editArrItem('about.experience',${i},['period','company','role','desc'])">✎ 编辑</button>
+    </div>`).join('');
+}
 
-  <script>
-    const OWNER = '2240854970-jpg', REPO = 'portfolio', DATA_PATH = 'src/data/site-data.js', IMG_DIR = 'public/images/', BRANCH = 'main';
-    let siteData = null, fileSha = '', gitToken = '', dirty = false, dataSha = '';
+// ── Achievements ──
+function renderAchievements(){
+  const arr=(siteData.about||{}).achievements||[];
+  document.getElementById('preview-achievements').innerHTML=arr.map((a,i)=>`
+    <div class="ach-card">
+      <span class="del" onclick="delArr('about.achievements',${i})">✕</span>
+      <div style="font-size:18px;margin-bottom:4px">${esc(a.icon)}</div>
+      <div style="font-weight:600;font-size:14px;color:#ddd">${esc(a.title)} <span style="font-size:11px;color:#888">${esc(a.year)}</span></div>
+      <div style="font-size:12px;color:#888;margin-top:4px;line-height:1.5">${esc(a.desc||'')}</div>
+      <button style="background:none;border:none;color:#888;cursor:pointer;font-size:10px;margin-top:4px" onclick="editArrItem('about.achievements',${i},['icon','title','year','desc'])">✎ 编辑</button>
+    </div>`).join('');
+}
 
-    // ── GitHub API ──
-    async function ghGet(path) {
-      const r = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`, {
-        headers: { 'Authorization': `Bearer ${gitToken}`, 'Accept': 'application/vnd.github+json' }
-      });
-      return r.ok ? await r.json() : null;
-    }
-    async function ghPut(path, content, msg, sha) {
-      const b64 = btoa(unescape(encodeURIComponent(content)));
-      const body = { message: msg, content: b64, branch: BRANCH };
-      if (sha) body.sha = sha;
-      const r = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`, {
-        method: 'PUT',
-        headers: { 'Authorization': `Bearer ${gitToken}`, 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-      });
-      return r.ok ? await r.json() : null;
-    }
-    async function ghListDir(path) {
-      const r = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`, {
-        headers: { 'Authorization': `Bearer ${gitToken}`, 'Accept': 'application/vnd.github+json' }
-      });
-      return r.ok ? await r.json() : [];
-    }
-    function decode64(b64) { try { return decodeURIComponent(escape(atob(b64))); } catch { return atob(b64); } }
+// ── Testimonials ──
+function renderTestimonials(){
+  const arr=(siteData.about||{}).testimonials||[];
+  document.getElementById('preview-testimonials').innerHTML=arr.map((t,i)=>`
+    <div class="test-card">
+      <span class="del" onclick="delArr('about.testimonials',${i})">✕</span>
+      <div style="font-size:13px;color:#ddd;line-height:1.6;font-style:italic">"${esc(t.quote||'')}"</div>
+      <div style="font-size:12px;color:#888;margin-top:6px">— ${esc(t.author)} ${t.role?'· '+esc(t.role):''}</div>
+      <button style="background:none;border:none;color:#888;cursor:pointer;font-size:10px;margin-top:4px" onclick="editArrItem('about.testimonials',${i},['quote','author','role'])">✎ 编辑</button>
+    </div>`).join('');
+}
 
-    // ── Parse siteData ──
-    function parseSiteData(raw) {
-      const m = raw.match(/export const siteData\s*=\s*({[\s\S]*?)\n\s*(?:export|$)/);
-      if (!m) return null;
-      try { return new Function('return ' + m[1])(); } catch(e) { return null; }
-    }
+// ── Socials ──
+function renderSocials(){
+  const arr=siteData.socials||[];
+  document.getElementById('preview-socials').innerHTML=arr.map((s,i)=>`
+    <div class="social-card">
+      <span class="sicon">${esc(s.icon)}</span>
+      <span class="sname">${esc(s.name)}</span>
+      <span class="surl">${esc(s.url)}</span>
+      <span class="del" onclick="delArr('socials',${i})">✕</span>
+      <button style="background:none;border:none;color:#888;cursor:pointer;font-size:10px" onclick="editArrItem('socials',${i},['name','url','icon'])">✎</button>
+    </div>`).join('');
+}
 
-    // ── Login ──
-    async function adminLogin() {
-      gitToken = document.getElementById('admin-token').value;
-      const pwd = document.getElementById('admin-pwd').value;
-      const resp = await ghGet(DATA_PATH);
-      if (!resp) { toast('无法连接 GitHub', 'error'); return; }
-      const raw = decode64(resp.content);
-      dataSha = resp.sha;
-      const sd = parseSiteData(raw);
-      if (!sd || sd.adminPassword !== pwd) { document.getElementById('admin-error').style.display = 'block'; return; }
-      siteData = sd;
-      document.getElementById('admin-error').style.display = 'none';
-      document.getElementById('login-modal').classList.remove('open');
-      document.getElementById('cms-panel').style.display = 'block';
-      document.getElementById('admin-entry').style.display = 'none';
-      document.body.style.background = '#0a0a0a';
-      renderAll();
-    }
+// ── Edit Simple Field ──
+function openEditField(path, label, currentValue, isLong){
+  editTarget={type:'field',path:path};
+  document.getElementById('edit-title').textContent='编辑 — '+label;
+  document.getElementById('edit-body').innerHTML=`
+    <div class="edit-field"><label>${label}</label>
+    ${isLong?'<textarea id="edit-val" rows="6">'+esc(String(currentValue||''))+'</textarea>':'<input id="edit-val" value="'+esc(String(currentValue||''))+'" />'}
+    </div>`;
+  document.getElementById('edit-modal').classList.add('open');
+}
 
-    // ── Render All ──
-    function renderAll() {
-      const d = siteData;
-      document.getElementById('f-name').value = d.name || '';
-      document.getElementById('f-nameEn').value = d.nameEn || '';
-      document.getElementById('f-title').value = d.title || '';
-      document.getElementById('f-tagline').value = d.tagline || '';
-      document.getElementById('f-email').value = d.email || '';
-      document.getElementById('f-adminPassword').value = d.adminPassword || '';
-      document.getElementById('f-footer').value = d.footer || '';
-      document.getElementById('f-featuredWorkIds').value = (d.featuredWorkIds || []).join(', ');
-      document.getElementById('f-bio1').value = (d.about||{}).bio1 || '';
-      document.getElementById('f-bio2').value = (d.about||{}).bio2 || '';
-      document.getElementById('f-bio3').value = (d.about||{}).bio3 || '';
-      renderStats();
-      renderHighlights();
-      renderWorks();
-      renderSkills();
-      renderExperience();
-      renderAchievements();
-      renderTestimonials();
-      renderSocials();
-    }
+// ── Edit Array Item ──
+function editArrItem(arrPath, index, keys){
+  const arr=getByPath(siteData,arrPath);
+  if(!arr||!arr[index]) return;
+  editTarget={type:'arrItem',path:arrPath,index:index,keys:keys};
+  document.getElementById('edit-title').textContent='编辑项目 #'+(index+1);
+  let html='';
+  keys.forEach(k=>{
+    let val=arr[index][k]!==undefined?arr[index][k]:'';
+    html+=`<div class="edit-field"><label>${k}</label><input id="ev-${k}" value="${esc(String(val))}" /></div>`;
+  });
+  document.getElementById('edit-body').innerHTML=html;
+  document.getElementById('edit-modal').classList.add('open');
+}
 
-    function makeCard(title, desc, editFn, delFn) {
-      return `<div class="cms-card"><div class="cms-card-header"><span class="cms-card-title">${title}</span><div class="cms-card-actions"><button onclick="${editFn}">编辑</button><button class="danger" onclick="${delFn}">删除</button></div></div><div class="cms-card-desc">${desc||''}</div></div>`;
-    }
+// ── Edit Work (complex) ──
+function editWork(index){
+  const w=siteData.works[index];
+  if(!w) return;
+  editTarget={type:'work',index:index};
+  document.getElementById('edit-title').textContent='编辑作品: '+w.title;
+  let html='';
+  [
+    ['id','ID'],['title','标题'],['category','分类'],['type','类型(image/video)'],
+    ['thumbnail','缩略图路径'],['bgGrad','背景渐变'],['videoUrl','视频链接'],
+    ['brief','简介'],['role','角色'],['date','日期'],
+    ['achievement','成果'],['designIntro','设计思路'],['designResult','设计成果']
+  ].forEach(([k,label])=>{
+    html+=`<div class="edit-field"><label>${label}</label><input id="ew-${k}" value="${esc(w[k]||'')}" /></div>`;
+  });
+  html+=`<div class="edit-field"><label>工具（逗号分隔）</label><input id="ew-tools" value="${esc((w.tools||[]).join(', '))}" /></div>`;
+  html+=`<div class="edit-field"><label>图片路径（逗号分隔）</label><textarea id="ew-images" rows="2">${esc((w.images||[]).join(', '))}</textarea></div>`;
+  html+=`<div class="edit-field"><label>ShowCase 数量: ${(w.showCase||[]).length}（暂不支持直接编辑，需手动改 site-data.js）</label></div>`;
+  document.getElementById('edit-body').innerHTML=html;
+  document.getElementById('edit-modal').classList.add('open');
+}
 
-    // Stats
-    function renderStats() {
-      const el = document.getElementById('stats-list');
-      el.innerHTML = (siteData.stats||[]).map((s,i) =>
-        makeCard(s.value+' '+s.label, s.icon, `editStat(${i})`, `delStat(${i})`)
-      ).join('');
-    }
-    function addStat() { siteData.stats = siteData.stats || []; siteData.stats.push({value:'数字',label:'描述',icon:'✦'}); markDirty(); renderStats(); }
-    function editStat(i) { editObj(siteData.stats[i], ['value','label','icon'], ()=>renderStats()); }
-    function delStat(i) { siteData.stats.splice(i,1); markDirty(); renderStats(); }
-
-    // Highlights
-    function renderHighlights() {
-      document.getElementById('highlights-list').innerHTML = (siteData.highlights||[]).map((h,i) =>
-        makeCard(h.label, h.desc, `editHighlight(${i})`, `delHighlight(${i})`)
-      ).join('');
-    }
-    function addHighlight() { siteData.highlights = siteData.highlights || []; siteData.highlights.push({icon:'✦',label:'标题',desc:'描述'}); markDirty(); renderHighlights(); }
-    function editHighlight(i) { editObj(siteData.highlights[i], ['icon','label','desc'], ()=>renderHighlights()); }
-    function delHighlight(i) { siteData.highlights.splice(i,1); markDirty(); renderHighlights(); }
-
-    // Works
-    function renderWorks() {
-      document.getElementById('works-list').innerHTML = (siteData.works||[]).map((w,i) =>
-        makeCard(w.title, w.category+' · '+w.date, `editWork(${i})`, `delWork(${i})`)
-      ).join('');
-    }
-    function addWork() {
-      siteData.works = siteData.works || [];
-      siteData.works.push({ id:'new-work-'+Date.now(), title:'新作品', category:'主图 / Banner 设计', type:'image', thumbnail:'', bgGrad:'linear-gradient(135deg,#1a2a3a,#6366f1)', images:[], videoUrl:'', brief:'', role:'', date:'2026.05', tools:[], achievement:'', designIntro:'', showCase:[], designResult:'' });
-      markDirty(); renderWorks();
-    }
-    function delWork(i) { if (confirm('确定删除「'+siteData.works[i].title+'」？')) { siteData.works.splice(i,1); markDirty(); renderWorks(); } }
-
-    let editingWorkIdx = -1;
-    function editWork(i) {
-      editingWorkIdx = i;
-      const w = siteData.works[i];
-      document.getElementById('work-modal-title').textContent = '编辑 — '+w.title;
-      const fields = [
-        ['id','ID'],['title','标题'],['category','分类'],['type','类型(image/video)'],['thumbnail','缩略图路径'],
-        ['bgGrad','背景渐变'],['videoUrl','视频链接'],['brief','简介'],['role','角色'],['date','日期'],
-        ['achievement','成果'],['designIntro','设计思路'],['designResult','设计成果']
-      ];
-      let html = fields.map(f => `<div class="cms-field"><label>${f[1]}</label><input id="wf-${f[0]}" value="${escHtml(w[f[0]]||'')}" /></div>`).join('');
-      html += `<div class="cms-field"><label>工具（逗号分隔）</label><input id="wf-tools" value="${escHtml((w.tools||[]).join(', '))}" /></div>`;
-      html += `<div class="cms-field"><label>图片（逗号分隔路径）</label><textarea id="wf-images" rows="2">${escHtml((w.images||[]).join(', '))}</textarea></div>`;
-      html += `<div class="cms-field"><label>ShowCase 数量：${(w.showCase||[]).length}</label></div>`;
-      document.getElementById('work-modal-body').innerHTML = html;
-      document.getElementById('work-modal').classList.add('open');
-    }
-    function saveWork() {
-      const w = siteData.works[editingWorkIdx];
-      ['id','title','category','type','thumbnail','bgGrad','videoUrl','brief','role','date','achievement','designIntro','designResult'].forEach(k => {
-        w[k] = document.getElementById('wf-'+k).value;
-      });
-      w.tools = document.getElementById('wf-tools').value.split(',').map(s=>s.trim()).filter(Boolean);
-      w.images = document.getElementById('wf-images').value.split(',').map(s=>s.trim()).filter(Boolean);
-      markDirty(); renderWorks(); closeWorkModal();
-    }
-    function closeWorkModal() { document.getElementById('work-modal').classList.remove('open'); editingWorkIdx = -1; }
-
-    // Skills
-    function renderSkills() {
-      const arr = (siteData.about||{}).skills || [];
-      document.getElementById('skills-list').innerHTML = arr.map((s,i) =>
-        makeCard(s.name, Math.round(s.level*100)+'%', `editSkill(${i})`, `delSkill(${i})`)
-      ).join('');
-    }
-    function addSkill() { if(!siteData.about) siteData.about = {}; siteData.about.skills = siteData.about.skills || []; siteData.about.skills.push({name:'技能名',level:0.8}); markDirty(); renderSkills(); }
-    function editSkill(i) { editObj(siteData.about.skills[i], ['name','level'], ()=>renderSkills()); }
-    function delSkill(i) { siteData.about.skills.splice(i,1); markDirty(); renderSkills(); }
-
-    // Experience
-    function renderExperience() {
-      const arr = (siteData.about||{}).experience || [];
-      document.getElementById('experience-list').innerHTML = arr.map((e,i) =>
-        makeCard(e.role+' @ '+e.company, e.period, `editExperience(${i})`, `delExperience(${i})`)
-      ).join('');
-    }
-    function addExperience() { if(!siteData.about) siteData.about = {}; siteData.about.experience = siteData.about.experience || []; siteData.about.experience.push({period:'2025 - 至今',company:'公司',role:'职位',desc:'描述'}); markDirty(); renderExperience(); }
-    function editExperience(i) { editObj(siteData.about.experience[i], ['period','company','role','desc'], ()=>renderExperience()); }
-    function delExperience(i) { siteData.about.experience.splice(i,1); markDirty(); renderExperience(); }
-
-    // Achievements
-    function renderAchievements() {
-      const arr = (siteData.about||{}).achievements || [];
-      document.getElementById('achievements-list').innerHTML = arr.map((a,i) =>
-        makeCard(a.title, a.year, `editAchievement(${i})`, `delAchievement(${i})`)
-      ).join('');
-    }
-    function addAchievement() { if(!siteData.about) siteData.about = {}; siteData.about.achievements = siteData.about.achievements || []; siteData.about.achievements.push({icon:'✦',title:'成就',year:'2025',desc:'描述'}); markDirty(); renderAchievements(); }
-    function editAchievement(i) { editObj(siteData.about.achievements[i], ['icon','title','year','desc'], ()=>renderAchievements()); }
-    function delAchievement(i) { siteData.about.achievements.splice(i,1); markDirty(); renderAchievements(); }
-
-    // Testimonials
-    function renderTestimonials() {
-      const arr = (siteData.about||{}).testimonials || [];
-      document.getElementById('testimonials-list').innerHTML = arr.map((t,i) =>
-        makeCard(t.author, t.quote.substring(0,40)+'...', `editTestimonial(${i})`, `delTestimonial(${i})`)
-      ).join('');
-    }
-    function addTestimonial() { if(!siteData.about) siteData.about = {}; siteData.about.testimonials = siteData.about.testimonials || []; siteData.about.testimonials.push({quote:'评价内容',author:'评价人',role:''}); markDirty(); renderTestimonials(); }
-    function editTestimonial(i) { editObj(siteData.about.testimonials[i], ['quote','author','role'], ()=>renderTestimonials()); }
-    function delTestimonial(i) { siteData.about.testimonials.splice(i,1); markDirty(); renderTestimonials(); }
-
-    // Socials
-    function renderSocials() {
-      document.getElementById('socials-list').innerHTML = (siteData.socials||[]).map((s,i) =>
-        makeCard(s.name, s.url, `editSocial(${i})`, `delSocial(${i})`)
-      ).join('');
-    }
-    function addSocial() { siteData.socials = siteData.socials || []; siteData.socials.push({name:'平台',url:'#',icon:'✦'}); markDirty(); renderSocials(); }
-    function editSocial(i) { editObj(siteData.socials[i], ['name','url','icon'], ()=>renderSocials()); }
-    function delSocial(i) { siteData.socials.splice(i,1); markDirty(); renderSocials(); }
-
-    // ── Generic Obj Editor ──
-    function editObj(obj, keys, cb) {
-      const fieldsHtml = keys.map(k => {
-        let val = obj[k] !== undefined ? obj[k] : '';
-        return `<div class="cms-field"><label>${k}</label><input id="eo-${k}" value="${escHtml(String(val))}" /></div>`;
-      }).join('');
-      const html = `<div>${fieldsHtml}</div><div style="margin-top:12px;display:flex;gap:8px"><button class="cms-btn" onclick="saveObjEdit('${keys.join(',')}',arguments[0])">保存</button><button class="cms-btn" style="background:#333" onclick="closeObjEdit()">取消</button></div>`;
-      document.getElementById('obj-editor-body').innerHTML = html;
-      document.getElementById('obj-editor-modal').classList.add('open');
-      window._objEditTarget = obj;
-      window._objEditKeys = keys;
-      window._objEditCb = cb;
-    }
-    function saveObjEdit() {
-      const obj = window._objEditTarget;
-      window._objEditKeys.forEach(k => { obj[k] = document.getElementById('eo-'+k).value; });
-      markDirty(); closeObjEdit();
-      if (window._objEditCb) window._objEditCb();
-    }
-    function closeObjEdit() { document.getElementById('obj-editor-modal').classList.remove('open'); }
-
-    // ── Serialize ──
-    function serializeSiteData(obj, indent = 0) {
-      const sp = '  '.repeat(indent), sp2 = '  '.repeat(indent+1);
-      if (obj === null) return 'null';
-      if (typeof obj === 'string') return "'" + obj.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\n/g,'\\n') + "'";
-      if (typeof obj === 'number' || typeof obj === 'boolean') return String(obj);
-      if (Array.isArray(obj)) {
-        if (obj.length === 0) return '[]';
-        if (obj.every(x => typeof x !== 'object' || x === null)) return '[' + obj.map(x => serializeSiteData(x,0)).join(', ') + ']';
-        return '[\n' + obj.map(x => sp2 + serializeSiteData(x, indent+1)).join(',\n') + '\n' + sp + ']';
-      }
-      if (typeof obj === 'object') {
-        const keys = Object.keys(obj);
-        if (keys.length === 0) return '{}';
-        const lines = keys.map(k => sp2 + k + ': ' + serializeSiteData(obj[k], indent+1));
-        return '{\n' + lines.join(',\n') + '\n' + sp + '}';
-      }
-      return String(obj);
-    }
-
-    function generateSiteDataJS() {
-      const body = serializeSiteData(siteData, 0);
-      return `/**\n * ═══════════════════════════════════════\n * ★ 站点内容数据 ★\n * 由管理后台生成\n * ═══════════════════════════════════════\n */\n\nexport const siteData = ${body};\n`;
-    }
-
-    // ── Save ──
-    async function saveAll() {
-      // Collect basic fields
-      ['name','nameEn','title','tagline','email','adminPassword','footer'].forEach(k => {
-        siteData[k] = document.getElementById('f-'+k).value;
-      });
-      siteData.featuredWorkIds = document.getElementById('f-featuredWorkIds').value.split(',').map(s=>s.trim()).filter(Boolean);
-      if(!siteData.about) siteData.about = {};
-      ['bio1','bio2','bio3'].forEach(k => { siteData.about[k] = document.getElementById('f-'+k).value; });
-
-      const js = generateSiteDataJS();
-      const msg = 'feat: 管理后台更新全站内容';
-      const result = await ghPut(DATA_PATH, js, msg, dataSha);
-      if (result) {
-        dataSha = result.content.sha;
-        dirty = false;
-        document.getElementById('dirty-count').textContent = '0';
-        toast('✅ 保存成功！GitHub Action 正在自动部署，1-2 分钟后生效', 'success');
-      } else {
-        toast('❌ 保存失败', 'error');
-      }
-    }
-
-    function markDirty() { dirty = true; document.getElementById('dirty-count').textContent = '●'; }
-
-    // ── File Upload ──
-    let pendingFiles = [];
-    function previewFiles() {
-      const input = document.getElementById('file-input');
-      pendingFiles = Array.from(input.files);
-      document.getElementById('file-preview').innerHTML = pendingFiles.map(f => {
-        const url = URL.createObjectURL(f);
-        const isVideo = f.type.startsWith('video/');
-        return `<div class="file-preview-item">${isVideo ? `<video src="${url}" controls></video>` : `<img src="${url}" />`}<div class="name">${f.name}</div></div>`;
-      }).join('');
-    }
-    async function uploadFiles() {
-      if (pendingFiles.length === 0) { toast('请先选择文件', 'error'); return; }
-      toast('正在上传 '+pendingFiles.length+' 个文件...');
-      let ok = 0;
-      for (const f of pendingFiles) {
-        const base64 = await new Promise(resolve => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result.split(',')[1]);
-          reader.readAsDataURL(f);
-        });
-        const path = IMG_DIR + Date.now() + '_' + f.name.replace(/[^a-zA-Z0-9._-]/g, '_');
-        const result = await ghPut(path, base64, 'upload: '+f.name);
-        if (result) ok++; else toast('上传失败: '+f.name, 'error');
-      }
-      if (ok > 0) { toast('✅ 成功上传 '+ok+' 个文件！路径: images/xxx', 'success'); pendingFiles = []; document.getElementById('file-preview').innerHTML = ''; document.getElementById('file-input').value = ''; loadFileList(); }
-    }
-    async function loadFileList() {
-      const files = await ghListDir(IMG_DIR);
-      if (!Array.isArray(files)) return;
-      document.getElementById('existing-files').innerHTML = '<div class="file-grid">' + files.filter(f => f.type === 'file').map(f => {
-        const url = f.download_url;
-        const isVideo = f.name.match(/\.(mp4|webm|mov)$/i);
-        return `<div class="file-item">${isVideo ? `<video src="${url}"></video>` : `<img src="${url}" loading="lazy" />`}<div class="fn" title="点击复制路径" onclick="copyPath('images/${f.name}')">images/${f.name}</div></div>`;
-      }).join('') + '</div>';
-    }
-    function copyPath(path) {
-      navigator.clipboard.writeText(path).then(() => toast('已复制: '+path));
-    }
-
-    // ── Tab Switch ──
-    document.addEventListener('click', e => {
-      if (e.target.classList.contains('cms-tab')) {
-        document.querySelectorAll('.cms-tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.cms-panel').forEach(p => p.classList.remove('active'));
-        e.target.classList.add('active');
-        document.getElementById('panel-'+e.target.dataset.tab).classList.add('active');
-      }
+function saveEdit(){
+  if(!editTarget) return;
+  if(editTarget.type==='field'){
+    const val=document.getElementById('edit-val').value;
+    setByPath(siteData,editTarget.path,val);
+    markDirty();
+    renderAll();
+    curTab();
+  }else if(editTarget.type==='arrItem'){
+    const arr=getByPath(siteData,editTarget.path);
+    editTarget.keys.forEach(k=>{
+      const v=document.getElementById('ev-'+k).value;
+      // Try number conversion for level field
+      if(k==='level') arr[editTarget.index][k]=parseFloat(v)||0;
+      else arr[editTarget.index][k]=v;
     });
-
-    // ── Toast ──
-    function toast(msg, type='') {
-      const el = document.getElementById('admin-toast');
-      el.textContent = msg; el.className = 'admin-toast '+type; el.classList.add('show');
-      setTimeout(() => el.classList.remove('show'), 4000);
-    }
-
-    function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
-
-    // ── Init ──
-    document.getElementById('admin-entry').addEventListener('click', () => {
-      document.getElementById('login-modal').classList.add('open');
+    markDirty();
+    renderAll();
+    curTab();
+  }else if(editTarget.type==='work'){
+    const w=siteData.works[editTarget.index];
+    ['id','title','category','type','thumbnail','bgGrad','videoUrl','brief','role','date','achievement','designIntro','designResult'].forEach(k=>{
+      w[k]=document.getElementById('ew-'+k).value;
     });
-    document.getElementById('login-modal').addEventListener('click', e => {
-      if (e.target === e.currentTarget) e.currentTarget.classList.remove('open');
-    });
-    document.getElementById('work-modal').addEventListener('click', e => {
-      if (e.target === e.currentTarget) closeWorkModal();
-    });
-  </script>
+    w.tools=document.getElementById('ew-tools').value.split(',').map(s=>s.trim()).filter(Boolean);
+    w.images=document.getElementById('ew-images').value.split(',').map(s=>s.trim()).filter(Boolean);
+    markDirty();
+    renderWorks();
+  }
+  closeEdit();
+}
+function closeEdit(){
+  document.getElementById('edit-modal').classList.remove('open');
+  editTarget=null;
+}
 
-  <!-- ====== Object Editor Modal ====== -->
-  <div class="admin-modal-overlay" id="obj-editor-modal">
-    <div class="admin-modal" style="max-width:500px">
-      <h3>编辑</h3>
-      <div id="obj-editor-body"></div>
-    </div>
-  </div>
+// ── Delete from array ──
+function delArr(path,index){
+  const arr=getByPath(siteData,path);
+  if(!arr) return;
+  const name=arr[index]?.title||arr[index]?.label||arr[index]?.name||('#'+(index+1));
+  if(!confirm('删除「'+name+'」？')) return;
+  arr.splice(index,1);
+  markDirty();
+  renderAll();
+  curTab();
+}
+
+// ── Add item ──
+function addItem(path){
+  const defaults={
+    stats:{value:'数字',label:'描述',icon:'✦'},
+    highlights:{icon:'✦',label:'标题',desc:'描述'},
+    works:{id:'work-'+Date.now(),title:'新作品',category:'主图 / Banner 设计',type:'image',thumbnail:'',bgGrad:'linear-gradient(135deg,#1a2a3a,#6366f1)',images:[],videoUrl:'',brief:'',role:'',date:'2026.05',tools:[],achievement:'',designIntro:'',showCase:[],designResult:''},
+    'about.skills':{name:'技能名',level:0.8},
+    'about.experience':{period:'2025-至今',company:'公司',role:'职位',desc:'描述'},
+    'about.achievements':{icon:'✦',title:'成就',year:'2025',desc:'描述'},
+    'about.testimonials':{quote:'评价内容',author:'评价人',role:''},
+    socials:{name:'平台',url:'#',icon:'✦'}
+  };
+  const arr=getByPath(siteData,path);
+  if(!arr) return;
+  arr.push(defaults[path]||{});
+  markDirty();
+  renderAll();
+  curTab();
+}
+
+// ── Serialize ──
+function ser(obj,indent=0){
+  const sp='  '.repeat(indent),sp2='  '.repeat(indent+1);
+  if(obj===null) return 'null';
+  if(typeof obj==='string') return "'"+obj.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\n/g,'\\n')+"'";
+  if(typeof obj==='number'||typeof obj==='boolean') return String(obj);
+  if(Array.isArray(obj)){
+    if(obj.length===0) return '[]';
+    if(obj.every(x=>typeof x!=='object'||x===null)) return '['+obj.map(x=>ser(x,0)).join(', ')+']';
+    return '[\n'+obj.map(x=>sp2+ser(x,indent+1)).join(',\n')+'\n'+sp+']';
+  }
+  if(typeof obj==='object'){
+    const keys=Object.keys(obj);
+    if(keys.length===0) return '{}';
+    return '{\n'+keys.map(k=>sp2+k+': '+ser(obj[k],indent+1)).join(',\n')+'\n'+sp+'}';
+  }
+  return String(obj);
+}
+
+async function saveAll(){
+  const js='/**\n * ═══════════════════════════════════════\n * ★ 站点内容数据 ★\n * 由管理后台生成\n * ═══════════════════════════════════════\n */\n\nexport const siteData = '+ser(siteData,0)+';\n';
+  toast('正在保存...');
+  const result=await ghPut(DATA_PATH,js,'feat: 管理后台可视化编辑',dataSha);
+  if(result){
+    dataSha=result.content.sha;
+    dirty=false;
+    document.getElementById('dirty-badge').textContent='已保存 ✓';
+    document.getElementById('dirty-badge').style.color='#22c55e';
+    toast('✅ 保存成功！1-2 分钟后网站自动更新','success');
+  }else{
+    toast('❌ 保存失败','error');
+  }
+}
+
+function markDirty(){
+  dirty=true;
+  document.getElementById('dirty-badge').textContent='● 有修改';
+  document.getElementById('dirty-badge').style.color='#f59e0b';
+}
+
+// ── Tab Switch ──
+let currentTab='home';
+function curTab(){switchTab(currentTab);}
+function switchTab(name){
+  currentTab=name;
+  document.querySelectorAll('.cms-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.cms-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelector(`.cms-tab[data-tab="${name}"]`).classList.add('active');
+  document.getElementById('panel-'+name).classList.add('active');
+}
+
+// ── Editable Click ──
+document.addEventListener('click',e=>{
+  const el=e.target.closest('.editable');
+  if(!el||!el.dataset.path) return;
+  const path=el.dataset.path;
+  const val=getByPath(siteData,path);
+  const label=path.replace(/\./g,' › ');
+  openEditField(path,label,val,typeof val==='string'&&val.length>50);
+});
+
+// ── Tab Click ──
+document.querySelectorAll('.cms-tab').forEach(btn=>{
+  btn.addEventListener('click',()=>switchTab(btn.dataset.tab));
+});
+
+// ── Edit Modal Click-outside ──
+document.getElementById('edit-modal').addEventListener('click',e=>{
+  if(e.target===e.currentTarget) closeEdit();
+});
+
+// ── File Upload ──
+let pendingFiles=[];
+function previewFiles(){
+  const input=document.getElementById('file-input');
+  pendingFiles=Array.from(input.files);
+  document.getElementById('file-preview').innerHTML=pendingFiles.map(f=>{
+    const url=URL.createObjectURL(f);
+    const isV=f.type.startsWith('video/');
+    return `<div class="file-preview-item">${isV?`<video src="${url}" controls></video>`:`<img src="${url}" />`}<div class="name">${f.name}</div></div>`;
+  }).join('');
+}
+async function uploadFiles(){
+  if(pendingFiles.length===0){toast('请先选择文件','error');return;}
+  toast('上传中...');
+  let ok=0;
+  for(const f of pendingFiles){
+    const b64=await new Promise(r=>{const rd=new FileReader();rd.onload=()=>r(rd.result.split(',')[1]);rd.readAsDataURL(f);});
+    const path=IMG_DIR+Date.now()+'_'+f.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+    const result=await ghPut(path,b64,'upload: '+f.name);
+    if(result) ok++; else toast('失败: '+f.name,'error');
+  }
+  if(ok>0){toast('✅ 成功 '+ok+' 个！','success');pendingFiles=[];document.getElementById('file-preview').innerHTML='';document.getElementById('file-input').value='';loadFileList();}
+}
+async function loadFileList(){
+  const files=await ghListDir(IMG_DIR);
+  if(!Array.isArray(files)) return;
+  document.getElementById('existing-files').innerHTML=files.filter(f=>f.type==='file').map(f=>{
+    const isV=f.name.match(/\.(mp4|webm|mov)$/i);
+    return `<div class="file-item">${isV?`<video src="${f.download_url}" style="width:100px;height:100px;object-fit:cover;border-radius:4px;border:1px solid #333"></video>`:`<img src="${f.download_url}" loading="lazy" />`}<div class="fn" title="点击复制路径" onclick="copyPath('images/${f.name}')">images/${f.name}</div></div>`;
+  }).join('');
+}
+function copyPath(p){navigator.clipboard.writeText(p).then(()=>toast('已复制: '+p));}
+
+// ── Toast ──
+function toast(msg,type=''){
+  const el=document.getElementById('admin-toast');
+  el.textContent=msg; el.className='admin-toast '+type; el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),4000);
+}
+</script>
 
 </body>
 </html>
