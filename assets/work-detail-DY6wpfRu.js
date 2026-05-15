@@ -1,4 +1,4 @@
-import{g as o,S as d,a as p,s as u,d as h,i as l}from"./utils-ZhmZOiER.js";/* empty css              */o.registerPlugin(d);window.addEventListener("load",()=>{const i=document.getElementById("loader");o.to(i,{opacity:0,duration:.8,delay:.3,ease:"power2.out",onComplete:()=>i.classList.add("hidden")})});function y(i){return new URLSearchParams(window.location.search).get(i)}function f(){const i=y("id"),e=h(i);if(!e){document.querySelector(".detail-section .container").innerHTML=`
+import{g as o,S as d,a as p,s as u,d as h,i as l}from"./utils-gq87UytY.js";/* empty css              */o.registerPlugin(d);window.addEventListener("load",()=>{const i=document.getElementById("loader");o.to(i,{opacity:0,duration:.8,delay:.3,ease:"power2.out",onComplete:()=>i.classList.add("hidden")})});function y(i){return new URLSearchParams(window.location.search).get(i)}function f(){const i=y("id"),e=h(i);if(!e){document.querySelector(".detail-section .container").innerHTML=`
       <a href="works.html" class="detail-back">← 返回作品集</a>
       <div class="detail-not-found">
         <h2>作品未找到</h2>
