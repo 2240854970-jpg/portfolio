@@ -73,7 +73,7 @@
       const b64 = btoa(unescape(encodeURIComponent(content)))
       const r = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`, {
         method: 'PUT',
-        headers: { 'Authorization': `Bearer ${gitToken}`, 'Accept': 'application/vnd.github+json`, 'Content-Type': 'application/json' },
+        headers: { 'Authorization': `Bearer ${gitToken}`, 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: msg, content: b64, sha: fileSha, branch: BRANCH })
       })
       if (r.ok) { const j = await r.json(); fileSha = j.content.sha }
