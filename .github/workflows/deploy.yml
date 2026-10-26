@@ -4,13 +4,18 @@ on:
   push:
     branches: [main]
     paths:
-      - 'src/**'
+      - 'src/visual/**'
+      - 'public-site/**'
       - 'index.html'
-      - 'about.html'
-      - 'works.html'
-      - 'work-detail.html'
-      - 'admin.html'
+      - 'package.json'
+      - 'package-lock.json'
       - 'vite.config.js'
+      - '.github/workflows/deploy.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: portfolio-pages
+  cancel-in-progress: false
 
 jobs:
   build-and-deploy:
@@ -20,18 +25,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-
-      - name: Install dependencies
-        run: npm install
-
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
       - name: Build
         run: npm run build
-
       - name: Deploy to gh-pages
         uses: peaceiris/actions-gh-pages@v4
         with:
