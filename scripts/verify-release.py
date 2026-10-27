@@ -30,10 +30,19 @@ with sync_playwright() as p:
  page.locator('#collection-close').click();page.locator('.aplus-preview').nth(1).click();page.wait_for_function("!document.querySelector('#zoom-native').disabled")
  assert page.locator('#lightbox-image').evaluate('(i)=>i.naturalHeight')==5400
  page.keyboard.press('Escape')
- for ident in ['aplus','scene','keyshot','collector','attributes','report']:
-  page.locator('#tab-'+ident).click();page.wait_for_function(f"document.querySelector('#tool-image').src.endsWith('{ident}.webp')&&document.querySelector('#tool-panel').getAttribute('aria-busy')==='false'")
-  assert '我的工作' in page.locator('#tool-result').inner_text()
-  if ident=='attributes':assert 'demo' in page.locator('#tool-proof').inner_text()
+ for ident in ['aplus','scene','keyshot','department','product','minimax']:
+  expected=page.evaluate('(id)=>PORTFOLIO.tools.find(t=>t.id===id).image',ident)
+  page.locator('#tab-'+ident).click();page.wait_for_function("(src)=>document.querySelector('#tool-image').src.endsWith(src)&&document.querySelector('#tool-panel').getAttribute('aria-busy')==='false'",arg=expected)
+  assert page.locator('#tool-problem').is_visible() and page.locator('#tool-problem').inner_text()
+  assert page.locator('#tool-contribution').count()==0 and '我的工作' not in page.locator('#tool-panel').inner_text()
+  assert page.locator('#tool-problem').evaluate('(e)=>parseFloat(getComputedStyle(e).fontSize)')>=18
+  assert page.locator('#tool-result').is_visible() and page.locator('#tool-result').inner_text()
+  expected_gallery=page.evaluate('(id)=>PORTFOLIO.tools.find(t=>t.id===id).gallery.map(g=>g.image)',ident)
+  assert page.locator('#tool-panel img').count()==len(expected_gallery)
+  assert all(img.is_visible() for img in page.locator('#tool-panel img').all())
+  assert page.locator('#tool-panel img').evaluate_all('(imgs)=>imgs.map(i=>i.src.split("/assets/tools/").pop())')==expected_gallery
+  assert page.locator('.focus-shot,#tool-focus,[data-focus]').count()==0
+  if ident=='product':assert '演示项目' in page.locator('#tool-proof').inner_text()
  widths=[]
  for width in [360,390,768,1024,1440,1920]:
   page.set_viewport_size({'width':width,'height':900});page.evaluate("scrollTo({top:0,behavior:'instant'})")

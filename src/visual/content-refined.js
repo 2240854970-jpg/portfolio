@@ -5,12 +5,12 @@ window.PORTFOLIO = {
     {id:'gy216',title:'条形光感夜灯',subtitle:'条形灯体、不同方向与场景适配',category:'形态与空间',code:'A-GY21602US',cover:'gy216-02.webp',hero:'gy216-hero.webp',layout:'full',intro:'围绕条形灯体的轮廓和方向安排展示，将状态、尺寸与使用情境分开说明。让统一内容结构保留产品差异。',focus:['条形轮廓','使用说明','场景适配'],images:['gy216-01.webp','gy216-02.webp','gy216-03.webp','gy216-04.webp','gy216-05.webp','gy216-06.webp','gy216-07.webp']}
   ],
   tools:[
-    {id:'aplus',title:'A+ 自动化工作台',tag:'视觉生产',subtitle:'把常规 A+ 变成自动交付流程。',purpose:'普通 A+ 自动生成与归档',image:'aplus.webp',description:'把新品监控、图片抓取、生成、尺寸裁剪和归档串起来。正常流程无需逐套人工操作，并开放给运营自助补跑。',contribution:'识别重复制作环节，定义任务与归档流程，结合 AI 辅助开发实现并维护。',result:'普通 A+ 自动化累计交付 500 余套，运营可自助补跑。',boundary:'界面中的单次任务状态与累计交付分别统计；网络异常和上游网站变化仍需人工维护。'},
-    {id:'scene',title:'场景图出图工作台',tag:'视觉生产',subtitle:'为主副图和 A+ 准备场景素材。',purpose:'批量组织产品与场景出图',image:'scene.webp',description:'按产品、场景模板和发光方向组织素材与生成任务，支持批量处理、结果预览、失败处理及归档。',contribution:'定义模板、素材匹配与发光方向规则，结合 AI 辅助实现工作流。',result:'将重复素材选择和提示词组织沉淀为可复用操作。',boundary:'界面用于说明生产方式；成图仍需核对产品结构、光效和文字，不以界面状态替代质量验收。'},
-    {id:'keyshot',title:'KeyShot 渲染工作区',tag:'视觉生产',subtitle:'为后续制作准备产品渲染素材。',purpose:'SKU 渲染任务与素材准备',image:'keyshot.webp',description:'把 SKU、渲染预设、任务与节点组织在同一工作区，为主副图和场景图生产准备产品素材。',contribution:'组织 SKU、渲染预设与任务步骤，使上游素材衔接后续视觉制作。',result:'这是场景图工作台中的渲染模块，不另算一套独立工具。',boundary:'这是场景图工作台中的渲染模块，非另一套独立产品；界面保留既有状态，内部路径已隐藏。'},
-    {id:'collector',title:'Amazon 3V 数据采集',tag:'产品研究',subtitle:'为选品与研究获取结构化资料。',purpose:'市场、搜索、评论资料采集',image:'collector.webp',description:'围绕市场、搜索与用户评论组织采集及结构化导出，保留异常和采样边界，为产品研究准备资料。',contribution:'拆解研究输入需求，组织采集范围、异常记录和结构化交付。',result:'产品部陆续使用的工具之一。',boundary:'结果受网站访问条件、页面变化与样本覆盖影响；采样资料不等同于全量数据。'},
-    {id:'attributes',title:'ASIN 属性打标',tag:'产品研究',subtitle:'让商品资料形成可审核的属性。',purpose:'图文属性结构化与审核',image:'attributes.webp',description:'组织商品资料、标签体系、批量打标与人工审核，帮助产品研究把零散信息转为结构化属性。',contribution:'定义标签与人工审核流程，推进图文资料的结构化处理。',result:'与图片人物／素材打标分别服务商品研究和素材整理。',boundary:'内置 demo 用于展示操作与审核结构，不代表正式打标成果，也不披露内部研究资料。'},
-    {id:'report',title:'品类 3V 趋势报告',tag:'产品研究',subtitle:'把原始资料组织成可追溯的研究报告。',purpose:'资料核验与品类研究报告',image:'report.webp',description:'接收市场、关键词和评论资料，组织事实核验、研究与报告，保留证据和来源关系，支持后续产品讨论。',contribution:'组织事实核验、证据和写作交付的衔接，结合 AI 辅助开发推进工作台。',result:'采集、打标与报告工作台已陆续被产品部复用。',boundary:'报告保留证据与版本供人工复核，结论受资料覆盖范围影响。'}
+    {id:'aplus',title:'A+ 自动化',tag:'视觉生产',purpose:'网页自动化与同步上线',image:'demo2-20261027/aplus-1.webp',disclosure:'真实任务记录 / 已做脱敏',gallery:[{image:'demo2-20261027/aplus-1.webp',label:'工作台运行界面'},{image:'demo2-20261027/aplus-2.webp',label:'自动化任务与完成记录'},{image:'demo2-20261027/aplus-3.webp',label:'A+ 成品示例'}],boundary:'截图中的单次任务记录与累计交付分别统计；网络异常和上游网页变化仍需维护。'},
+    {id:'scene',title:'场景图出图工作台',tag:'视觉生产',purpose:'模板与渲染联动出图',image:'demo2-20261027/scene-1.webp',disclosure:'真实工作台与成图展示',gallery:[{image:'demo2-20261027/scene-1.webp',label:'产品参考与资料约束'},{image:'demo2-20261027/scene-2.webp',label:'场景方案与成图记录'},{image:'demo2-20261027/scene-3.webp',label:'场景图成品示例'}],boundary:'2 分钟／10 张为该工作流的业务交付表现，不作为所有产品与任务配置的固定时限；上线前仍需核对产品结构、材质、光效和文案。'},
+    {id:'keyshot',title:'自动化渲染工作台',tag:'视觉生产',purpose:'多角度、多模板批量渲染',image:'demo2-20261027/keyshot-1.webp',disclosure:'真实工作区与渲染产出',gallery:[{image:'demo2-20261027/keyshot-1.webp',label:'渲染任务与节点管理'},{image:'demo2-20261027/keyshot-2.webp',label:'渲染素材输出示例'}],boundary:'减少的是人工重复操作，不将其直接等同于 GPU 渲染时间缩短；截图任务状态不替代素材质量验收。'},
+    {id:'department',title:'部门工作台',tag:'团队协作',purpose:'飞书权限与团队资料沉淀',image:'demo2-20261027/department-1.webp',disclosure:'真实工作台 / 账号标识已遮挡',gallery:[{image:'demo2-20261027/department-1.webp',label:'部门入口与工具资源'},{image:'demo2-20261027/department-2.webp',label:'工作台访问权限'}],boundary:'平台基于 Hana / OpenHanako 定制，结合飞书进行权限联动与资料沉淀；截图中的账号统计不用于推导活跃人数或效率成果。'},
+    {id:'product',title:'产品流程工作台',tag:'产品研发',purpose:'3V 分析到产品规格书',image:'demo2-20261027/product-1.webp',disclosure:'演示项目 / 研发阶段界面',gallery:[{image:'demo2-20261027/product-1.webp',label:'产品项目与流程总览'},{image:'demo2-20261027/product-2.webp',label:'研究资料与报告工作区'}],boundary:'截图包含演示项目与阶段界面，不代表已上市产品或完整研发项目的交付数量；研究结论仍需核对来源。'},
+    {id:'minimax',title:'MiniMax H3 本地部署',tag:'AI 视频',purpose:'开源部署与 AI 视频降本',image:'demo2-20261027/minimax-1.webp',disclosure:'本地视频工作台界面',gallery:[{image:'demo2-20261027/minimax-1.webp',label:'视频任务队列与作品管理'}],boundary:'案例聚焦开源模型部署与流程适配。本地运行仍涉及设备与运行开销，具体成本随模型、分辨率、时长及任务配置变化；不展示未经统一口径核算的降本比例。'}
   ],
   moreTools:[
     {title:'多店铺视觉模板库与套图 SOP',tag:'模板与技术培训',text:'面向 LOHAS、DORESSHOT 等夜灯店铺建设视觉模板与素材库，梳理套图 SOP，并通过技术培训下放到各组员复用执行；将模板、流程和 AI 应用连接到全流程交付。'},
@@ -47,30 +47,12 @@ window.PORTFOLIO.featured = {
  }
 };
 
-window.PORTFOLIO.toolDetails = {
- aplus:[
-  {image:'aplus-focus-1.webp',title:'输入与店铺规则',text:'指定产品目录，按店铺组织提示词。把每次人工重复填写的前置条件整理为固定入口。'},
-  {image:'aplus-focus-2.webp',title:'任务编排',text:'两轮生成与成品处理在同一任务链中呈现，支持加入队列、暂停和继续。'},
-  {image:'aplus-focus-3.webp',title:'成品状态与记录',text:'查看成品处理进度、输出入口和日志。图中状态来自历史任务，不是本次重新生成。'}
- ],
- scene:[
-  {image:'scene-focus-1.webp',title:'把视觉变量显式化',text:'模板、发光方向、SKU 和批量设置分开组织，让场景生产有明确输入。'},
-  {image:'scene-focus-2.webp',title:'集中观察执行状态',text:'组合数量、预计输出、进度与日志放在同一位置，方便检查任务而非逐个追图。'}
- ],
- keyshot:[
-  {image:'keyshot-focus-1.webp',title:'组织 SKU 与渲染输入',text:'目录扫描、场景与相机条件进入同一操作区，连接批量素材准备。'},
-  {image:'keyshot-focus-2.webp',title:'查看渲染状态',text:'显示软件就绪情况、预设与任务进度。此处是工作台的渲染模块，未在本次启动任务。'}
- ],
- collector:[
-  {image:'collector-focus-1.webp',title:'明确采集范围',text:'ASIN、关键词及 VOM／VOS／VOC 范围独立配置，减少采集前的重复整理。'},
-  {image:'collector-focus-2.webp',title:'分类预览资料',text:'商品、搜索、评论与跳过记录分区展示，后续研究可按资料角色接收输入。'}
- ],
- attributes:[
-  {image:'attributes-focus-1.webp',title:'导入、确认与处理分层',text:'资料、标签确认和正式打标分成不同步骤，避免未经确认的标签直接成为结果。'},
-  {image:'attributes-focus-2.webp',title:'回到商品与证据',text:'在商品列表和详情之间核对内容。此处为内置 demo 商品，不代表真实标注完成量。'}
- ],
- report:[
-  {image:'report-focus-1.webp',title:'统一四类资料入口',text:'市场、主要词、精准词与评论进入同一输入环节，供后续事实核验和研究使用。'},
-  {image:'report-focus-2.webp',title:'让检查过程可见',text:'生成入口与检查记录分开呈现。截图处于等待上传状态，不冒充已生成报告。'}
- ]
+// Six owner-selected cases from 演示2. Only confirmed outcomes are quantified.
+window.PORTFOLIO.toolCases = {
+ aplus:{title:'零图与 A+ 同步上线',summary:'用网页自动化替代逐套制作，释放设计人力。',problem:'普通 A+ 的人工制作、裁剪与整理反复占用人力，也容易与零图交付脱节，影响新品链接完整度。',resultLabel:'核心成效',result:'普通 A+ 全自动制作，与零图同步上线，提升新品链接前期完整度；累计交付 500 余套。'},
+ scene:{title:'场景图一站式交付',summary:'场景模板联动自动渲染，直接面向可上线成图。',problem:'场景图制作需要反复衔接渲染、场景生成和画面调整，中间重复生成与刷图占用大量时间。',resultLabel:'核心成效',result:'2 分钟交付 10 张可直接上线的场景图，减少中间环节的重复生成与反复刷图。'},
+ keyshot:{title:'多角度、多模板自动渲染',summary:'把逐项人工操作，转为批量自动出图。',problem:'每个 SKU 都要反复加载、选择模板、调整渲染设置并启动任务，人员时间被机械操作占用。',resultLabel:'核心成效',result:'自动完成多角度、多模板渲染，大幅减少重复加载、选择与设置，让人员从机械操作中释放出来。'},
+ department:{title:'企业内部 AI 工具平台',summary:'整合部门工具，联动飞书权限与资料沉淀。',problem:'工具、资料与权限分散，成员使用和协作交接需要反复寻找资源、确认访问范围。',resultLabel:'核心成效',result:'统一企业内部 AI 工具入口，联动飞书权限管理与资料沉淀，减少资源查找和协作交接的沟通负担。'},
+ product:{title:'产品研发一体化工作流',summary:'面向产品部，将多个工具组织成连续的研发流程。',problem:'研发阶段分散在不同工具中，资料反复搬运、信息容易断层，阶段交接难以连续衔接。',resultLabel:'核心成效',result:'串联 3V 分析、机会方向、机会报告与产品规格书，减少资料搬运，让研究成果连续进入后续研发环节。'},
+ minimax:{title:'本地视频工作流与成本优化',summary:'部署开源模型，并按业务需要适配生成流程。',problem:'批量 AI 视频制作成本高，通用生成工具难以直接适配现有业务流程。',resultLabel:'核心成效',result:'通过开源模型本地部署与业务工作流适配，大幅降低 AI 视频制作成本，满足批量业务制作需求。'}
 };
