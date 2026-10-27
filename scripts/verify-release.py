@@ -40,7 +40,10 @@ with sync_playwright() as p:
   expected_gallery=page.evaluate('(id)=>PORTFOLIO.tools.find(t=>t.id===id).gallery.map(g=>g.image)',ident)
   assert page.locator('#tool-panel img').count()==len(expected_gallery)
   assert all(img.is_visible() for img in page.locator('#tool-panel img').all())
+  assert page.locator('#tool-panel img').evaluate_all('(imgs)=>imgs.every(i=>Number(i.getAttribute("width"))>0&&Number(i.getAttribute("height"))>0)')
   assert page.locator('#tool-panel img').evaluate_all('(imgs)=>imgs.map(i=>i.src.split("/assets/tools/").pop())')==expected_gallery
+  page.evaluate("document.querySelectorAll('#tool-panel img').forEach(i=>i.loading='eager')")
+  page.wait_for_function("[...document.querySelectorAll('#tool-panel img')].every(i=>i.complete&&i.naturalWidth>0)")
   assert page.locator('.focus-shot,#tool-focus,[data-focus]').count()==0
   if ident=='product':assert '演示项目' in page.locator('#tool-proof').inner_text()
  widths=[]

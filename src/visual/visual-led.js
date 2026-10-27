@@ -42,7 +42,7 @@ async function selectTool(id,keyboard=false){
   $('#tool-proof').textContent=t.disclosure;
   $('#tool-overview>span').textContent=`01 / ${String(t.gallery.length).padStart(2,'0')} · 放大 ↗`;
   $('#tool-overview').setAttribute('aria-label',`放大${t.title}第1张图片`);
-  $('#tool-inline-images').innerHTML=t.gallery.slice(1).map((g,i)=>`<button class="tool-shot" data-case-image="${i+1}" aria-label="放大${esc(t.title)}第${i+2}张图片"><img src="${T+g.image}" alt="${esc(t.title+' · '+g.label)}" loading="lazy"><span>${String(i+2).padStart(2,'0')} / ${String(t.gallery.length).padStart(2,'0')} · 放大 ↗</span></button>`).join('');
+  $('#tool-inline-images').innerHTML=t.gallery.slice(1).map((g,i)=>`<button class="tool-shot" data-case-image="${i+1}" aria-label="放大${esc(t.title)}第${i+2}张图片"><img src="${T+g.image}" alt="${esc(t.title+' · '+g.label)}" width="${g.width}" height="${g.height}" loading="lazy"><span>${String(i+2).padStart(2,'0')} / ${String(t.gallery.length).padStart(2,'0')} · 放大 ↗</span></button>`).join('');
   $('#tool-result-label').textContent=c.resultLabel;$('#tool-result').textContent=c.result;
   $('#tool-problem').textContent=c.problem;
   $('#tool-detail-body').innerHTML=`<p>${esc(t.boundary)}</p>${id==='aplus'?'<p>普通 A+ 原人工完整周期约两天，包含等待、反馈与修改，不等同于净工时。</p>':''}`;
