@@ -5,3 +5,7 @@ artifacts/
 .env
 .env.*
 !.env.example
+
+# Tencent Cloud EdgeOne local credentials and generated build output
+.edgeone/
+.tef_dist/

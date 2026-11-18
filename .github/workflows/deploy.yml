@@ -1,17 +1,15 @@
-name: Deploy to GitHub Pages
+name: Legacy GitHub Pages (manual rollback only)
 
+# The live domain is on EdgeOne. Keep the old hosting as an explicit fallback,
+# rather than publishing a second site on every main push.
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'src/visual/**'
-      - 'public-site/**'
-      - 'index.html'
-      - 'package.json'
-      - 'package-lock.json'
-      - 'vite.config.js'
-      - '.github/workflows/deploy.yml'
   workflow_dispatch:
+    inputs:
+      confirm_restore:
+        description: 'Explicitly rebuild the legacy GitHub Pages fallback'
+        type: boolean
+        required: true
+        default: false
 
 concurrency:
   group: portfolio-pages
@@ -19,6 +17,7 @@ concurrency:
 
 jobs:
   build-and-deploy:
+    if: ${{ inputs.confirm_restore }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -28,7 +27,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22.11.0'
           cache: npm
       - name: Install locked dependencies
         run: npm ci
