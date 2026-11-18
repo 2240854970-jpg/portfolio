@@ -1,0 +1,56 @@
+name: Publish portfolio to EdgeOne
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: portfolio-edgeone-production
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      EDGEONE_PROJECT_NAME: lilong-portfolio-trial-20261118
+      EDGEONE_PAGES_API_REGION: china
+    steps:
+      - name: Checkout approved source
+        uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.11.0'
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Build website
+        run: npm run build
+      - name: Validate assets and stamp source revision
+        run: node scripts/ci/check-build.mjs
+      - name: Publish to existing free EdgeOne project
+        env:
+          EDGEONE_PAGES_API_TOKEN: ${{ secrets.EDGEONE_API_TOKEN }}
+        run: |
+          if [ -z "$EDGEONE_PAGES_API_TOKEN" ]; then
+            echo "Missing deployment secret EDGEONE_API_TOKEN."
+            exit 1
+          fi
+          npx --yes edgeone@1.7.2 makers deploy ./dist \
+            --name "$EDGEONE_PROJECT_NAME" \
+            --area overseas --env production --skip-ai-gateway-sync --json
+      - name: Verify the live domain serves this commit
+        run: node scripts/ci/verify-live.mjs
+      - name: Deployment receipt
+        if: success()
+        run: |
+          echo "### Portfolio published" >> "$GITHUB_STEP_SUMMARY"
+          echo "Site: https://chaojifeishu.xyz/" >> "$GITHUB_STEP_SUMMARY"
+          echo "Source: $GITHUB_SHA" >> "$GITHUB_STEP_SUMMARY"
+          echo "Existing project; no DNS or plan changes." >> "$GITHUB_STEP_SUMMARY"
