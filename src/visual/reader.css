@@ -1,0 +1,28 @@
+/* Hallmark · checked refinement: A+ long-image reader · existing white portfolio tokens and other image readers preserved. */
+/* A+ gets one compact toolbar and no bottom caption band. Image pixels remain uncropped. */
+.reader-options{display:contents}
+#reader-more{display:none}
+#lightbox.long-read .lightbox-toolbar{display:flex;align-items:center;gap:var(--space-md);padding:var(--space-2xs) var(--space-md);min-height:56px}
+#lightbox.long-read #lightbox-title{flex:1;min-width:0;overflow:clip;text-overflow:ellipsis;white-space:nowrap;font-size:var(--text-sm)}
+#lightbox.long-read .zoom-controls{order:1;flex:none;gap:var(--space-2xs);font-size:var(--text-xs)}
+#lightbox.long-read .zoom-controls button,#lightbox.long-read .zoom-controls a{border:0;min-height:44px;min-width:44px;padding:var(--space-xs) var(--space-sm);display:inline-flex;align-items:center;justify-content:center}
+#lightbox.long-read .zoom-controls #reader-more{display:none}
+#lightbox.long-read #close-lightbox{order:2;flex:none;min-width:64px;min-height:44px;font-size:var(--text-sm)}
+#lightbox.long-read .zoom-hint{display:none}
+#lightbox.long-read #lightbox-viewport{left:var(--space-xs);right:var(--space-xs);top:56px;bottom:0}
+#lightbox.long-read #lightbox-caption{display:none}
+#lightbox.long-read .image-nav{width:44px;height:44px;top:50%;border:1px solid var(--line);border-radius:var(--radius-control)}
+#lightbox.long-read .image-nav.prev{left:var(--space-xs)}
+#lightbox.long-read .image-nav.next{right:var(--space-xs)}
+@media(max-width:760px){
+ #lightbox.long-read .lightbox-toolbar{gap:var(--space-xs);padding:var(--space-2xs) var(--space-xs);align-items:flex-start}
+ #lightbox.long-read #lightbox-title{display:none}
+ #lightbox.long-read .zoom-controls{flex:1;min-width:0;flex-wrap:wrap;gap:0 var(--space-2xs)}
+ #lightbox.long-read .zoom-controls button,#lightbox.long-read .zoom-controls a{padding:var(--space-xs);font-size:var(--text-xs)}
+ #lightbox.long-read .zoom-controls #reader-more{display:inline-flex}
+ #lightbox.long-read .reader-options{display:none}
+ #lightbox.long-read.reader-options-open .reader-options{display:flex;flex-basis:100%;flex-wrap:wrap;align-items:center;gap:var(--space-2xs)}
+ #lightbox.long-read #lightbox-viewport{left:0;right:0}
+ #lightbox.long-read .image-nav.prev{left:var(--space-2xs)}
+ #lightbox.long-read .image-nav.next{right:var(--space-2xs)}
+}
